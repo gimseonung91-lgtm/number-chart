@@ -1,0 +1,73 @@
+/* ---------- 인쇄용 학습지 (화면 미리보기에서도 종이처럼 흰 바탕 유지) ---------- */
+.sheets{display:flex;flex-direction:column;align-items:center;gap:20px;margin-top:16px;overflow-x:auto;padding-bottom:10px}
+.sheet{
+  width:210mm;min-height:297mm;height:297mm;flex:none;background:#fff;color:#000;padding:13mm 12mm;
+  box-shadow:0 2px 14px rgba(0,0,0,.18);font-family:'Noto Sans KR','Malgun Gothic',sans-serif;overflow:hidden;
+  display:flex;flex-direction:column
+}
+.sh-head{border:1.5px solid #000;display:flex;justify-content:space-between;gap:10px;padding:5px 14px;font-size:11pt;font-weight:700;white-space:pre}
+.sh-title{border:1.5px solid #000;padding:6px 14px;margin-top:8px;font-size:12.5pt;font-weight:700;text-align:center}
+.sh-body{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6mm;padding-top:5mm}
+table.sh-board{border-collapse:collapse;border:2.5px solid #000;table-layout:fixed;width:180mm}
+table.sh-board td{border:1px solid #000;height:18mm;text-align:left;vertical-align:top;padding:2.5mm 0 0 2.5mm;font-family:'Jua','Malgun Gothic',sans-serif;font-size:19pt;line-height:1}
+table.sh-board td.c5{border-right:2.5px solid #000}
+table.sh-board tr.r5 td{border-bottom:2.5px solid #000}
+.ans{color:#888}
+.sh-cross-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9mm 16mm}
+.sh-cross{display:grid;grid-template-columns:repeat(3,19mm);grid-template-rows:repeat(3,19mm)}
+.sh-cross div{border:1.5px solid #000;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Jua','Malgun Gothic',sans-serif;font-size:20pt;line-height:1;margin:-0.75px}
+.sh-cross div.ctr{border-width:3px;background:#eee}
+.sh-cross div small{font-family:'Noto Sans KR',sans-serif;font-size:6.5pt;font-weight:700;margin-top:auto;padding-bottom:1mm}
+.sh-cross div span{margin-top:auto}
+.sh-legend{font-size:9.5pt;display:flex;gap:6mm;flex-wrap:wrap;justify-content:center;font-weight:700}
+.sh-cmp{display:grid;grid-template-columns:repeat(2,1fr);gap:7mm 18mm;width:100%}
+.sh-cmp h4{grid-column:1/-1;margin:2mm 0 0;font-size:12pt}
+.sh-pair{display:flex;align-items:center;gap:6mm;font-family:'Jua','Malgun Gothic',sans-serif;font-size:22pt}
+.sh-pair .no{font-family:'Noto Sans KR',sans-serif;font-size:10pt;width:7mm}
+.sh-pair span.n{width:22mm;height:17mm;display:grid;place-items:center;border:1.5px solid #000;border-radius:3mm}
+.sh-pair span.n.circ{border-radius:50%;border:2.5px solid #888;color:#888}
+.sh-seq{display:flex;flex-direction:column;gap:6mm}
+.sh-row{display:flex;align-items:center;gap:2.5mm}
+.sh-row .no{font-size:10pt;width:7mm}
+.sh-row span.n{width:20mm;height:15mm;border:1.5px solid #000;display:grid;place-items:center;font-family:'Jua','Malgun Gothic',sans-serif;font-size:19pt}
+.sh-row i{font-style:normal;font-size:8pt;width:11mm;white-space:nowrap;text-align:center;line-height:1.1;font-weight:700}
+.sh-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7mm 10mm;width:100%}
+.sh-item{min-width:0;border:1.5px solid #000;border-radius:3mm;padding:4mm;display:flex;align-items:center;justify-content:space-between;gap:4mm}
+.sh-item .no{font-size:10pt;align-self:flex-start}
+.sh-dots{position:relative;width:52mm;height:35mm;flex:none}
+.sh-dots i{position:absolute;width:9mm;height:9mm;border-radius:50%;border:1.5px solid #000;background:#bbb}
+.sh-box{flex:none;width:20mm;height:16mm;border:1.5px solid #000;display:grid;place-items:center;font-family:'Jua','Malgun Gothic',sans-serif;font-size:20pt}
+.sh-item.st{align-items:flex-end}
+.sh-stw{display:flex;flex-direction:column;gap:1.5mm;margin:0 auto}
+.sh-st{display:flex;align-items:flex-end;gap:3mm}
+.sh-st .c{display:flex;flex-direction:column-reverse;align-items:center;gap:.6mm}
+.sh-st .b{width:12mm;height:4.4mm;border:1px solid #000;background:#ccc}
+.sh-st .card{width:14mm;height:12mm;border:1.5px solid #000;margin-top:1.5mm;display:grid;place-items:center;font-family:'Jua','Malgun Gothic',sans-serif;font-size:17pt}
+.sh-st .card.k{border-width:3px;background:#eee}
+.sh-stl{display:grid;grid-template-columns:repeat(3,14mm);gap:0 3mm;margin-left:-1mm;font-size:7pt;font-weight:700;text-align:center}
+.sh-tw{display:flex;flex-direction:column;gap:3mm;flex:1}
+.sh-tens{display:flex;align-items:flex-end;gap:1.5mm;flex-wrap:wrap;min-height:44mm}
+.sh-tens .tb{display:flex;flex-direction:column;gap:.4mm;border:1px solid #000;padding:.4mm;background:#fff}
+.sh-tens i{width:3.4mm;height:3.4mm;border:.6px solid #000;background:#ccc;display:block}
+.sh-tens .ones{display:grid;grid-template-columns:repeat(3,3.4mm);gap:1mm;margin-left:2mm}
+.sh-tq{font-size:11pt;font-weight:700;display:flex;align-items:center;gap:1.5mm;flex-wrap:wrap}
+.sh-tq .sb{width:10mm;height:9mm;border:1.5px solid #000;display:inline-grid;place-items:center;font-family:'Jua','Malgun Gothic',sans-serif;font-size:14pt}
+.sh-tq .sb.w{width:15mm}
+.sh-frame{display:grid;border:2px solid #000;margin:0 auto}
+.sh-frame.c10{grid-template-columns:repeat(5,10mm)}
+.sh-frame.c5{grid-template-columns:repeat(5,10mm)}
+.sh-frame span{width:10mm;height:10mm;border:1px solid #000;display:grid;place-items:center}
+.sh-frame i{width:7mm;height:7mm;border-radius:50%;background:#444;display:block}
+.print-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+
+@media print{
+  @page{size:A4 portrait;margin:0}
+  html,body{background:#fff!important;padding:0!important;margin:0!important}
+  .no-print,.pointer,.veil,.demo-badge,.gate{display:none!important}
+  .wrap{max-width:none}
+  .sheets{display:block;margin:0;padding:0;overflow:visible;gap:0}
+  .sheet{box-shadow:none;margin:0;break-after:page;page-break-after:always}
+  .sheet:last-child{break-after:auto;page-break-after:auto}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+

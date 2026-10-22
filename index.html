@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#28486B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="수 배열표">
+<meta name="format-detection" content="telephone=no">
+<title>수 배열표 놀이</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/sheets.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top no-print">
+    <button class="brand" data-go="home">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i></span>
+      <span class="brand-label">수 배열표 놀이 <small class="brand-credit">특수교사 김선웅</small></span>
+    </button>
+    <div class="top-right">
+      <nav class="nav" aria-label="선생님 메뉴">
+        <button data-go="teacher">선생님 홈</button>
+        <button data-go="print">학습지 인쇄</button>
+        <button data-go="records">기록</button>
+        <button data-go="settings">설정</button>
+      </nav>
+      <button class="teach" id="teachBtn"><span>선생님</span></button>
+    </div>
+  </header>
+
+  <!-- 선생님 확인: 글을 읽고 2초 동안 눌러야 열린다 (학생이 실수로 열지 않게) -->
+  <div class="gate no-print" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="gate-card">
+      <h3 id="gateTitle">선생님 메뉴 열기</h3>
+      <p>학습지 인쇄, 학습 기록, 설정이 있어요. 학생이 실수로 열지 않도록 아래 버튼을 <b>2초 동안 누르고 있으면</b> 열려요.</p>
+      <button class="hold-btn" id="holdBtn"><i></i><span>여기를 누르고 있기</span></button>
+      <button class="btn ghosty" id="gateClose">닫기</button>
+    </div>
+  </div>
+
+  <!-- 선생님 홈 -->
+  <main id="v-teacher" class="no-print" hidden>
+    <h2>선생님 홈</h2>
+    <p class="lede">학생이 앱에서 배운 내용을 종이 학습지로 다시 풀어 보게 할 수 있어요. 학습지는 이 컴퓨터에 연결된 프린터로 인쇄돼요.</p>
+    <div class="t-grid">
+      <button class="t-card main" data-go="print"><span class="t-ic" data-icon="print"></span><span class="t-tt">학습지 인쇄</span><span class="t-dd">놀이 8가지에 맞춘 A4 학습지와 정답지</span></button>
+      <button class="t-card" data-go="records"><span class="t-ic" data-icon="chart"></span><span class="t-tt">학습 기록</span><span class="t-dd">놀이별로 처음에 맞힌 비율</span></button>
+      <button class="t-card" data-go="settings"><span class="t-ic" data-icon="gear"></span><span class="t-tt">설정</span><span class="t-dd">도움 정도, 보기 개수, 소리, 범위</span></button>
+      <button class="t-card" id="studentStart"><span class="t-ic" data-icon="play"></span><span class="t-tt">학생 화면 시작</span><span class="t-dd">선생님 메뉴를 닫고 전체 화면으로 놀이를 열어요</span></button>
+    </div>
+  </main>
+
+  <!-- 홈 -->
+  <main id="v-home" class="no-print">
+    <div class="sec-head">
+      <h2>기초 다지기</h2>
+      <p class="lede">수 개념이 처음인 학생은 1번부터 차례대로 해요. 화면 놀이 전에 블록 같은 진짜 물건으로 먼저 해 보면 더 좋아요.</p>
+    </div>
+    <ol class="path">
+      <li><button class="mode step" data-start="count">
+        <span class="stepno">1</span>
+        <span class="pic dots" aria-hidden="true"><i class="on">1</i><i class="on">2</i><i></i></span>
+        <span class="mt">하나씩 세어 보기</span>
+        <span class="md">하나씩 눌러 세고, 마지막에 센 수가 모두의 수예요.</span>
+      </button></li>
+      <li><button class="mode step" data-start="flash">
+        <span class="stepno">2</span>
+        <span class="pic frame" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on2"></i><i class="on2"></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="mt">한눈에 보기</span>
+        <span class="md">세지 않고 한눈에 몇 개인지 알아봐요. 5를 3과 2로도 봐요.</span>
+      </button></li>
+      <li><button class="mode step" data-start="stair">
+        <span class="stepno">3</span>
+        <span class="pic stairs" aria-hidden="true"><i style="height:10px"></i><i style="height:20px"></i><i style="height:30px" class="plus"></i><i style="height:40px"></i></span>
+        <span class="mt">블록 계단</span>
+        <span class="md">블록 하나를 올리면 1 큰 수, 내리면 1 작은 수가 돼요.</span>
+      </button></li>
+      <li><button class="mode step" data-start="ten">
+        <span class="stepno">4</span>
+        <span class="pic tens" aria-hidden="true"><i class="bar"></i><i class="bar"></i><i class="one"></i><i class="one"></i><i class="one"></i></span>
+        <span class="mt">10 묶음</span>
+        <span class="md">10이 2개, 1이 3개면 23이에요. 수 배열표와 이어져요.</span>
+      </button></li>
+    </ol>
+
+    <div class="sec-head">
+      <h2>수 배열표 놀이</h2>
+      <p class="lede">기초 다지기를 마친 뒤, 1부터 100까지 수의 차례와 관계를 익혀요.</p>
+    </div>
+    <div class="home-grid">
+      <button class="mode" data-start="board">
+        <span class="pic b" aria-hidden="true"><span>1</span><span>2</span><span class="q">?</span><span>4</span><span>11</span><span class="q">?</span><span>13</span><span>14</span></span>
+        <span class="mt">수 배열표 채우기</span>
+        <span class="md">빈칸에 빠진 수를 차례대로 넣어요.</span>
+      </button>
+      <button class="mode" data-start="near">
+        <span class="pic x" aria-hidden="true"><span class="e"></span><span>14</span><span class="e"></span><span class="q">?</span><span>24</span><span>25</span><span class="e"></span><span>34</span><span class="e"></span></span>
+        <span class="mt">이웃 수 찾기</span>
+        <span class="md">왼쪽은 1 작은 수, 오른쪽은 1 큰 수. 위는 10 작은 수, 아래는 10 큰 수.</span>
+      </button>
+      <button class="mode" data-start="cmp">
+        <span class="pic c" aria-hidden="true"><span>34</span><span class="e" style="width:auto;font-size:1rem">vs</span><span>57</span></span>
+        <span class="mt">더 큰 수, 더 작은 수</span>
+        <span class="md">두 수 중에서 더 큰 수나 더 작은 수를 골라요.</span>
+      </button>
+      <button class="mode" data-start="seq">
+        <span class="pic s" aria-hidden="true"><span>5</span><span>6</span><span class="q">?</span><span>8</span></span>
+        <span class="mt">수 이어가기</span>
+        <span class="md">규칙대로 이어지는 수에서 빈칸을 채워요.</span>
+      </button>
+    </div>
+
+    <div class="quick">
+      <div class="grp"><span class="lab">기초 범위 (1~3번)</span><div class="chips" id="q-small"></div></div>
+      <div class="grp"><span class="lab">수 범위</span><div class="chips" id="q-range"></div></div>
+      <div class="grp"><span class="lab">단계 (이웃 수 · 이어가기)</span><div class="chips" id="q-level"></div></div>
+      <div class="grp"><span class="lab">답하는 방법</span><div class="chips" id="q-answer"></div></div>
+    </div>
+    <div class="firstthen" id="firstThen"></div>
+    <div class="legend" aria-label="색의 뜻">
+      <span><i style="background:var(--less)"></i>왼쪽 · 1 작은 수</span>
+      <span><i style="background:var(--more)"></i>오른쪽 · 1 큰 수</span>
+      <span><i style="background:var(--up)"></i>위 · 10 작은 수</span>
+      <span><i style="background:var(--down)"></i>아래 · 10 큰 수</span>
+    </div>
+  </main>
+
+
+  <!-- 놀이: 지시(그림+소리) → 놀이판 → 답하는 곳. 배치는 모든 놀이에서 같다 -->
+  <main id="v-play" class="no-print" hidden>
+    <div class="play-top">
+      <button class="quit" id="quitBtn" data-icon="home" aria-label="그만하기"></button>
+      <div class="tokens" id="tokens" aria-label="진행"></div>
+      <!-- SCERTS: 학생이 스스로 요청하는 그림 버튼. 누르면 앱이 학생 대신 소리 내어 말해 준다 -->
+      <div class="asks" id="asks">
+        <button class="ask-btn help" id="askHelpBtn" data-icon="askHelp" aria-label="도와주세요"><span>도와주세요</span></button>
+        <button class="ask-btn rest" id="askRestBtn" aria-label="쉬고 싶어요"><span>쉬고 싶어요</span><span class="rest-cards" id="restCards" aria-hidden="true"></span></button>
+      </div>
+    </div>
+    <div class="instr">
+      <div class="tools">
+        <button class="ibtn" id="speakBtn" data-icon="speaker" aria-label="다시 듣기" title="다시 듣기"></button>
+        <button class="ibtn show" id="demoBtn" data-icon="hand" aria-label="보여 줘" title="보여 줘"></button>
+      </div>
+      <div class="what">
+        <div class="glyphs" id="glyphs" aria-hidden="true"></div>
+        <div class="txt" id="instrText"></div>
+      </div>
+    </div>
+    <div class="play-body">
+      <div class="stage" id="stage"></div>
+      <div class="side">
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div class="choices" id="choices" hidden></div>
+        <div class="pad" id="pad" hidden>
+          <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+          <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+          <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+          <button data-k="del" class="k-del">지우기</button><button data-k="0">0</button><button data-k="ok" class="k-ok">확인</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- SCERTS 정서 조절: 기분 묻기 (그림 얼굴 3개에서 고르기) -->
+  <div class="reg no-print" id="moodView" hidden role="dialog" aria-modal="true" aria-label="지금 기분이 어때요?">
+    <div class="reg-card">
+      <p class="reg-t">지금 기분이 어때요?</p>
+      <div class="moods" id="moodPick"></div>
+    </div>
+  </div>
+
+  <!-- SCERTS 정서 조절: 쉬는 곳 (숨쉬기 그림 + 남은 시간 막대) -->
+  <div class="reg no-print" id="breakView" hidden role="dialog" aria-modal="true" aria-label="잠깐 쉬어요">
+    <div class="reg-card">
+      <div class="breath" aria-hidden="true"><span class="breath-in"></span><span class="breath-ic" id="breathIc"></span></div>
+      <p class="reg-t">잠깐 쉬어요</p>
+      <div class="btimer" aria-hidden="true"><i id="btimerBar"></i></div>
+      <div class="btns">
+        <button class="btn big" id="breakBack" data-icon="play">다시 하기</button>
+        <button class="btn big ghosty" id="breakStop" data-icon="home">그만하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCERTS 공동주의: 함께 보기 (선생님에게 보여 주고 함께 기뻐하기) -->
+  <div class="reg no-print" id="shareView" hidden role="dialog" aria-modal="true" aria-label="선생님에게 보여 줘요">
+    <div class="reg-card">
+      <div class="share-pic" aria-hidden="true" id="sharePic"></div>
+      <p class="reg-t">선생님에게 보여 줘요</p>
+      <button class="btn big share-ok" id="shareOk" data-icon="star">봤어요!</button>
+    </div>
+  </div>
+
+  <!-- 끝: 별 + (함께 보기) + (기분) + 다음 활동 그림 -->
+  <main id="v-done" class="no-print" hidden>
+    <div class="done-card">
+      <div class="stars" id="stars"></div>
+      <h2>다 했어요!</h2>
+      <div class="done-step" id="doneShare" hidden>
+        <span class="share-pic sm" aria-hidden="true"></span>
+        <button class="btn big share-ok" data-share-ok data-icon="star">봤어요!</button>
+      </div>
+      <div class="done-step" id="doneMood" hidden>
+        <div class="moods sm" id="doneMoodPick"></div>
+      </div>
+      <div class="reward-pic" id="rewardPic"></div>
+      <div class="reward" id="rewardText"></div>
+      <div class="btns">
+        <button class="btn big" id="againBtn" data-icon="again">한 번 더</button>
+        <button class="btn big ghosty" data-go="home" data-icon="home">처음으로</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 인쇄 -->
+  <main id="v-print" hidden>
+    <div class="no-print">
+      <div class="print-head">
+        <div>
+          <h2>학습지 인쇄</h2>
+          <p class="lede">앱에서 한 놀이를 고르면, 같은 내용의 A4 학습지가 아래에 만들어져요. 범위와 단계는 지금 설정을 따라요.</p>
+        </div>
+        <button class="btn big" id="printBtn" data-icon="print">인쇄하기</button>
+      </div>
+      <div class="panel">
+        <span class="flab">1. 어떤 놀이의 학습지인가요?</span>
+        <div class="p-types" id="pTypes" role="radiogroup" aria-label="학습지 종류"></div>
+        <span class="flab" style="margin-top:18px;display:block">2. 범위와 양</span>
+        <div class="form">
+          <div class="field" id="pf-small"><label for="p-small">기초 범위</label>
+            <select id="p-small"><option value="5">5까지</option><option value="10">10까지</option></select></div>
+          <div class="field" id="pf-range"><label for="p-range">수 범위</label>
+            <select id="p-range"><option value="20">1 ~ 20</option><option value="30">1 ~ 30</option><option value="50">1 ~ 50</option><option value="100">1 ~ 100</option></select></div>
+          <div class="field" id="pf-blanks"><label for="p-blanks">빈칸 개수</label>
+            <input id="p-blanks" type="number" min="0" max="100" value="20">
+            <small>0이면 모든 수가 보이는 표, 범위와 같은 수면 완전히 빈 표가 돼요.</small></div>
+          <div class="field" id="pf-level"><label for="p-level">단계</label>
+            <select id="p-level"><option value="1">1단계 · 옆 (1 작은 수, 1 큰 수)</option><option value="2">2단계 · 위아래 (10 작은 수, 10 큰 수)</option><option value="3">3단계 · 모두</option></select></div>
+          <div class="field"><label for="p-pages">몇 장</label>
+            <select id="p-pages"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>10</option></select></div>
+          <div class="field"><span class="flab">추가</span>
+            <label class="check"><input type="checkbox" id="p-answer" checked> 정답지 함께 인쇄</label>
+            <label class="check" id="pf-help"><input type="checkbox" id="p-help" checked> 도움말(1 작은 수 등) 함께 쓰기</label></div>
+        </div>
+        <div class="print-actions">
+          <button class="btn ghosty" id="regenBtn" data-icon="again">문제 새로 만들기</button>
+          <span class="small-note" id="printInfo"></span>
+        </div>
+        <p class="small-note print-tip">인쇄 창이 열리면 용지는 <b>A4</b>, 여백은 <b>없음</b>(또는 기본), <b>배경 그래픽</b>을 켜면 미리보기와 똑같이 나와요.</p>
+      </div>
+      <h3 class="set-h" style="margin-top:22px">미리보기</h3>
+    </div>
+    <div class="sheets" id="sheets"></div>
+  </main>
+
+  <!-- 기록 -->
+  <main id="v-records" class="no-print" hidden>
+    <h2>학습 기록</h2>
+    <p class="lede">처음 시도에서 맞힌 문제 수와 함께, 도움을 얼마나 받았는지, 스스로 요청했는지, 기분이 어땠는지를 보여 줘요. 이 기기의 브라우저에만 저장돼요.</p>
+    <div class="panel">
+      <div class="sum" id="recSum"></div>
+      <h3 class="set-h">의사소통과 정서 조절 (SCERTS 관찰 · 최근 10번)</h3>
+      <div class="sum" id="recScerts"></div>
+      <div class="tbl"><table class="rec"><thead><tr><th>날짜</th><th>놀이</th><th>범위</th><th>단계</th><th>도움</th><th>처음에 맞힘</th><th title="힌트를 보고 맞힘 / 정답을 따라 누름">힌트 · 따라 함</th><th title="학생이 버튼으로 요청한 횟수">요청 (도움 · 쉬기)</th><th>기분 (시작 → 끝)</th><th></th></tr></thead><tbody id="recBody"></tbody></table></div>
+      <div class="print-actions">
+        <button class="btn ghosty" id="clearRec">기록 모두 지우기</button>
+        <span class="small-note" id="clearNote"></span>
+      </div>
+    </div>
+  </main>
+
+
+  <!-- 설정 -->
+  <main id="v-settings" class="no-print" hidden>
+    <h2>선생님 설정</h2>
+    <p class="lede">바꾸면 바로 저장돼요. 학생에게 맞춰 조금씩 조절해 주세요.</p>
+    <div class="panel">
+      <h3 class="set-h">학생이 보고 듣는 방법</h3>
+      <div class="form">
+        <div class="field"><label for="s-demo">손가락으로 먼저 보여 주기</label>
+          <select id="s-demo"><option value="first">놀이를 시작할 때 자동으로</option><option value="button">'보여 줘' 버튼을 누를 때만</option></select>
+          <small>손가락이 먼저 풀어 보이고, 같은 문제를 학생이 다시 해요. 놀이 중에도 노란 손 버튼으로 언제든 다시 볼 수 있어요.</small></div>
+        <div class="field"><label for="s-help">도움 정도</label>
+          <select id="s-help">
+            <option value="lots">많이 · 힌트는 처음부터, 손가락 안내는 2초 뒤</option>
+            <option value="some">조금 · 한 번 틀리면 힌트, 손가락 안내는 8초 뒤</option>
+            <option value="none">스스로 · 두 번 틀리면 힌트, 손가락 안내는 16초 뒤</option>
+          </select>
+          <small>어느 단계든 계속 틀리면 정답이 반짝이고 손가락이 가리켜서, 따라 누르며 끝낼 수 있어요.</small></div>
+        <div class="field"><label for="s-answer">답하는 방법</label>
+          <select id="s-answer"><option value="choice">보기에서 고르기</option><option value="pad">숫자 키패드로 입력</option></select>
+          <small>질문에 답을 떠올리기 어려운 학생은 '고르기'로 시작해요.</small></div>
+        <div class="field"><label for="s-choiceN">보기 개수</label>
+          <select id="s-choiceN"><option value="2">2개</option><option value="3">3개</option></select>
+          <small>2개에서 시작하고, 익숙해지면 3개로 늘려요. 10 이하의 수는 보기에 점도 함께 나와요.</small></div>
+        <div class="field">
+          <span class="flab">소리와 움직임</span>
+          <label class="check"><input type="checkbox" id="s-voice"> 지시와 칭찬을 소리로 읽어 주기</label>
+          <label class="check"><input type="checkbox" id="s-sound"> 효과음</label>
+          <label class="check"><input type="checkbox" id="s-calm"> 움직임 줄이기</label>
+          <small>글을 읽기 어려운 학생에게는 소리 읽기를 꼭 켜 주세요.</small></div>
+        <div class="field"><span class="flab">다 하면 할 활동 (먼저-다음 판)</span>
+          <div class="rw-pick" id="rwPick"></div>
+          <label for="s-reward" class="small-note">이름 바꾸기 (비우면 그림 이름)</label>
+          <input id="s-reward" type="text" maxlength="20"></div>
+      </div>
+      <h3 class="set-h">의사소통과 정서 조절 (SCERTS)</h3>
+      <div class="form">
+        <div class="field"><span class="flab">학생이 스스로 요청하기</span>
+          <label class="check"><input type="checkbox" id="s-askBtns"> '도와주세요'·'쉬고 싶어요' 그림 버튼 보이기</label>
+          <small>학생이 누르면 앱이 학생 대신 소리 내어 말해요. 들리면 바로 들어주세요(도움 → 함께 풀기, 쉬기 → 쉬는 화면).</small></div>
+        <div class="field"><label for="s-mood">기분 묻기</label>
+          <select id="s-mood"><option value="both">시작할 때와 끝날 때</option><option value="start">시작할 때만</option><option value="off">묻지 않기</option></select>
+          <small>얼굴 그림 3개(좋아요 · 그저 그래요 · 힘들어요)에서 골라요. '힘들어요'를 고르면 먼저 쉬고 시작해요.</small></div>
+        <div class="field"><label for="s-restCards">쉬기 카드 (한 놀이에 바로 쉴 수 있는 횟수)</label>
+          <select id="s-restCards"><option value="0">제한 없음</option><option value="1">1장</option><option value="2">2장</option><option value="3">3장</option></select>
+          <small>쉬기 버튼 아래 동그라미로 남은 장수가 보여요. 다 쓰거나 방금 쉬었으면 바로 쉬지 않고 "먼저 ○개 더 해요. 그다음에 쉬어요."로 바뀌어요. 앱이 힘들어 보여서 권한 쉬기와 '힘들어요' 쉬기는 카드를 쓰지 않아요.</small></div>
+        <div class="field"><label for="s-restWait">먼저 할 문제 수 (기다렸다 쉬기)</label>
+          <select id="s-restWait"><option value="1">1문제</option><option value="2">2문제</option><option value="3">3문제</option></select>
+          <small>요청은 늘 들어주되, 정한 만큼 한 뒤에 쉬어요. 쉬고 돌아온 뒤에도 이만큼은 해야 다시 쉴 수 있어요. 1문제에서 시작해 기다리는 힘이 생기면 늘려요.</small></div>
+        <div class="field"><label for="s-breakSec">쉬는 시간</label>
+          <select id="s-breakSec"><option value="20">20초</option><option value="30">30초</option><option value="60">1분</option><option value="120">2분</option></select>
+          <small>숨쉬기 그림과 줄어드는 막대로 끝을 보여 줘요. 언제든 '다시 하기'로 돌아올 수 있어요.</small></div>
+        <div class="field"><label for="s-share">함께 보기 (공동주의)</label>
+          <select id="s-share"><option value="end">끝날 때</option><option value="mid">반을 했을 때와 끝날 때</option><option value="off">안 함</option></select>
+          <small>"선생님에게 보여 줘요" 화면이 나오면 학생과 눈을 맞추고 함께 기뻐한 뒤 '봤어요!'를 눌러 주세요.</small></div>
+        <div class="field"><span class="flab">힘들어 보일 때</span>
+          <label class="check"><input type="checkbox" id="s-offerBreak"> 쉬기 버튼을 손가락으로 알려 주기</label>
+          <small>짧은 시간에 여러 번 틀리거나 아무것도 안 누르고 오래 있거나, 두 문제 연속으로 정답을 따라 눌렀을 때 알려 줘요. 요청 버튼이 보일 때만 동작해요.</small></div>
+      </div>
+      <h3 class="set-h">문제 범위와 양</h3>
+      <div class="form">
+        <div class="field"><label for="s-small">기초 범위 (세어 보기 · 한눈에 보기 · 블록 계단)</label>
+          <select id="s-small"><option value="5">5까지</option><option value="10">10까지</option></select>
+          <small>5까지의 수 관계가 단단해진 뒤에 10까지로 넓혀요.</small></div>
+        <div class="field"><label for="s-range">수 범위 (10 묶음 · 수 배열표 놀이)</label>
+          <select id="s-range"><option value="20">1 ~ 20</option><option value="30">1 ~ 30</option><option value="50">1 ~ 50</option><option value="100">1 ~ 100</option></select></div>
+        <div class="field"><label for="s-count">한 번에 푸는 문제 수</label>
+          <select id="s-count"><option value="5">5문제</option><option value="10">10문제</option><option value="15">15문제</option><option value="20">20문제</option></select>
+          <small>위쪽 동그라미로 남은 수가 보여요. 끝이 보이도록 짧게 해요.</small></div>
+        <div class="field"><label for="s-level">단계 (이웃 수 · 이어가기)</label>
+          <select id="s-level"><option value="1">1단계 · 옆 (1 작은 수, 1 큰 수)</option><option value="2">2단계 · 위아래 (10 작은 수, 10 큰 수)</option><option value="3">3단계 · 모두 섞기</option></select></div>
+        <div class="field"><label for="s-blanks">수 배열표 빈칸 개수</label>
+          <input id="s-blanks" type="number" min="1" max="99">
+          <label class="check"><input type="checkbox" id="s-order"> 작은 수부터 차례대로 채우기</label></div>
+        <div class="field"><label class="check"><input type="checkbox" id="s-flash"> 한눈에 보기: 점을 2초만 보여 주기</label>
+          <small>처음에는 꺼 두고, 익숙해지면 켜서 세지 않고 알아보게 해요.</small></div>
+      </div>
+      <details class="why" open>
+        <summary>글을 몰라도 할 수 있게 만든 장치 (UDL)</summary>
+        <ul>
+          <li><b>여러 가지로 보여 주기 (표상)</b>: 지시는 그림 줄(예: <b>3 → +1 → ?</b>)과 소리로 함께 줘요. 글은 선생님이 보는 작은 글씨로만 남겼어요. 10 이하의 보기에는 숫자와 함께 점이 나와서, 숫자를 읽기 어려워도 양으로 맞출 수 있어요.</li>
+          <li><b>손가락으로 보여 주기 (비디오 모델링)</b>: 놀이를 시작하면 손가락이 먼저 풀어 보이고, 같은 문제를 학생이 다시 해요. "내가 할게 → 네가 해" 순서예요.</li>
+          <li><b>같은 약속</b>: 노란 칸은 늘 '답이 들어가는 곳', 별은 '맞았어요', 둥근 화살표는 '다시', 손은 '네 차례', 눈은 '잘 봐요'. 모든 놀이에서 뜻이 같아요.</li>
+          <li><b>질문 대신 고르기 (행동과 표현)</b>: 답을 떠올려 말하지 않아도 보기 2개 중 하나를 누르면 돼요. 키패드, 고르기, 키보드 숫자 중 편한 방법을 쓸 수 있어요.</li>
+          <li><b>기다려 주는 손가락 안내</b>: 한동안 누르지 않으면 손가락이 누를 곳을 가리켜요. 도움 정도에 따라 2초, 8초, 16초를 기다려요.</li>
+          <li><b>예측 가능한 흐름 (구조화된 지도)</b>: 화면 배치가 늘 같고, 동그라미로 '얼마나 남았는지', 끝에 그림으로 '끝나면 무엇을 하는지'를 보여 줘요.</li>
+          <li><b>참여 유지</b>: 문제마다 동그라미가 채워지고, 다 하면 별과 함께 미리 정한 활동 그림이 나와요. 틀려도 큰 소리나 빨간 X가 없어요.</li>
+          <li><b>놀이 밖으로 나가지 않게</b>: 학생 화면에는 놀이만 보여요. 설정·인쇄·기록은 '선생님' 버튼을 길게 눌러야 열려요.</li>
+        </ul>
+      </details>
+      <details class="why">
+        <summary>SCERTS 모델로 본 이 앱과 선생님의 역할</summary>
+        <p class="small-note">SCERTS는 자폐성장애 학생을 위한 모델로, <b>사회 의사소통(SC)</b>, <b>정서 조절(ER)</b>, <b>교류 지원(TS)</b> 세 영역을 함께 키워요. 앱은 도구이고, 학생 곁의 어른이 <b>대화 상대</b>가 될 때 효과가 커요.</p>
+        <ul>
+          <li><b>SC · 공동주의</b>: '함께 보기' 화면에서 학생이 화면이나 선생님을 보면 같은 것을 보며 "와, 23을 찾았네!"처럼 함께 기뻐해 주세요. 손가락 시범을 볼 때 학생이 손가락을 따라 보는지도 살펴요.</li>
+          <li><b>SC · 상징 사용</b>: 학생은 그림 버튼(도와주세요, 쉬고 싶어요, 기분 얼굴)으로 <b>스스로 요청하고 표현</b>해요. 버튼을 누르면 앱이 소리로 말해 주니, 말처럼 받아 주세요. 세기·수 이름 카드는 숫자·한자어·고유어 수 이름을 잇는 상징 연습이에요.</li>
+          <li><b>ER · 자기 조절</b>: 예측 가능한 흐름, 동그라미 토큰, '마지막 문제예요' 예고, 먼저-다음 판, 숨쉬기 쉬는 화면이 스스로 진정하는 전략이 돼요.</li>
+          <li><b>ER · 상호 조절</b>: 학생이 도움이나 쉬기를 요청하면 앱이 바로 들어주고, 힘들어 보이면(빠르게 여러 번 틀림, 오래 멈춤, 연속으로 정답을 따라 누름) 쉬기 버튼을 알려 줘요. 선생님도 같은 신호를 보면 먼저 쉬자고 해 주세요.</li>
+          <li><b>쉬기를 자주 요청할 때</b>: 요청을 무시하면 '말해도 소용없다'를 배우니 꼭 들어주되, <b>쉬기 카드</b>로 남은 횟수를 보여 주고, 카드를 다 쓰거나 방금 쉬었으면 <b>먼저 몇 문제 → 그다음 쉬기</b>로 기다리는 힘을 길러요(기록의 '기다렸다 쉬기'). 그래도 잦으면 피하고 싶은 까닭을 살펴요: 문제가 어렵거나(범위·단계 낮추기, 보기 2개, 도움 많이), 길거나(문제 수 줄이기), 다 한 뒤의 활동이 매력이 없거나(먼저-다음 활동 바꾸기), 몸 상태가 안 좋은지. 쉬는 화면은 일부러 조용하고 단조롭게 만들어 놀이보다 더 재미있지 않아요.</li>
+          <li><b>TS · 학습 지원</b>: 그림 지시, 손가락 시범, 오류 없는 학습, 같은 색·모양 약속, 보기 2개, 학습지 인쇄.</li>
+          <li><b>TS · 대인 지원</b>: 기다려 주기(손가락 안내 시간), 학생 수준에 맞춘 도움 정도. 학생이 버튼으로 요청한 것은 꼭 들어주어 '요청하면 통한다'를 배우게 해요.</li>
+          <li><b>관찰 기록</b>: 학습 기록에 스스로 맞힘·힌트 후·따라 함, 도움·쉬기 요청 수, 기분이 쌓여요. 정답률뿐 아니라 <b>스스로 요청한 횟수가 늘어나는지</b>를 함께 봐 주세요. 가정에도 학습지와 함께 알려 주면 같은 방법으로 지원할 수 있어요.</li>
+        </ul>
+      </details>
+      <details class="why">
+        <summary>기초 다지기의 지도 순서 (수학 1정 연수 자료 바탕)</summary>
+        <ul>
+          <li><b>활동 → 그림 → 기호</b>: 브루너의 표현 단계를 따라요. 진짜 블록으로 먼저 해 보고(활동), 앱의 그림으로 다시 하고(영상), 숫자로 나타내요(상징).</li>
+          <li><b>1. 하나씩 세어 보기</b>: 일대일 대응, 안정된 순서, 순서 무관, 기수의 원리. 흩어 놓아도 수는 같아요(수의 보존).</li>
+          <li><b>2. 한눈에 보기</b>: 즉각적 인지. 10칸 틀과 두 가지 색으로 5를 3과 2로 보는 것처럼 수를 여러 가지로 봐요.</li>
+          <li><b>3. 블록 계단</b>: 블록을 하나 올리면 1 큰 수, 들어 올리면 1 작은 수. 수 사이의 관계를 알아야 덧셈·뺄셈으로 이어져요.</li>
+          <li><b>4. 10 묶음</b>: "23은 20과 3". 수 배열표에서 아래로 한 칸이 10 큰 수인 까닭이에요.</li>
+        </ul>
+      </details>
+    </div>
+  </main>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/config.js"></script>
+<script src="js/speech.js"></script>
+<script src="js/modes.js"></script>
+<script src="js/records.js"></script>
+<script src="js/scerts.js"></script>
+<script src="js/play.js"></script>
+<script src="js/print.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
