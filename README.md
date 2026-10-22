@@ -26,14 +26,6 @@
 | 배열표 | 더 큰 수, 더 작은 수 | 크기 비교 |
 | 배열표 | 수 이어가기 | 1씩, 10씩 뛰어 세기 |
 
-## 깃허브 페이지로 올리기
-
-1. 깃허브에서 새 저장소를 만들고 [업로드 안내](깃허브_올리기_안내.md)의 파일 목록에 따라 올려요. 브라우저에서 직접 올릴 때는 `.gitignore`가 파일을 걸러 주지 않으므로 필요한 파일만 골라요.
-2. 저장소의 **Settings → Pages**에서 Source를 `Deploy from a branch`, 브랜치를 `main`, 폴더를 `/ (root)`로 고르고 저장해요.
-3. 배포가 끝나면 `https://<아이디>.github.io/<저장소 이름>/` 주소로 열려요. 반영에는 최대 10분 정도 걸릴 수 있어요([GitHub 공식 안내](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)).
-
-`audio/clips.js`는 약 12MB예요. 브라우저 업로드의 파일당 25MiB 제한보다 작아요([GitHub 공식 안내](https://docs.github.com/en/repositories/working-with-files/managing-files/adding-a-file-to-a-repository)).
-
 ## 수 개념 지도 참고 문서
 
 [수 개념 지도 메모](<수 개념 지도 메모.md>)에는 앱의 학습 목표와 활용 방법을 정리했어요. PDF나 이미지 없이 읽을 수 있으며, 앱의 실행에 필요한 파일은 아니에요.
