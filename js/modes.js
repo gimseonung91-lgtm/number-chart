@@ -134,7 +134,6 @@ M.flash = {
   look: G => [{ sel: '.flashbox', say: G.p.split ? [GWA(G.p.split), (G.p.n - G.p.split) + '.'] : ['점을 잘 봐요.'] }]
 };
 
-/* 3. 블록 계단 — 연수 자료의 나무 블록 활동: 하나 올리면 1 큰 수, 들어 올리면 1 작은 수 */
 M.stair = {
   label: '블록 계단', basic: true, dots: true,
   gen(G) {
