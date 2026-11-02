@@ -12,7 +12,7 @@ function harness() {
     const el = { hidden: false, innerHTML: '', dataset: {}, style: { setProperty() {} },
       classList: { add: (...xs) => xs.forEach(x => classes.add(x)), remove: (...xs) => xs.forEach(x => classes.delete(x)),
         contains: x => classes.has(x), toggle(x, on) { if (on) classes.add(x); else classes.delete(x); } },
-      addEventListener: (event, fn) => { listeners[event] = fn; },
+      addEventListener: (event, fn) => { listeners[event] = fn; }, setAttribute() {},
       querySelector: selector => element(key + selector), focus() {}, scrollIntoView() {},
       getBoundingClientRect: () => ({ top: 10, bottom: 40, left: 10, width: 30, height: 30 }),
       click(data = {}) { listeners.click?.({ currentTarget: el, target: { closest: () => ({ dataset: data }) } }); }

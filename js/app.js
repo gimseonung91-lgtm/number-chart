@@ -23,8 +23,9 @@ document.addEventListener('click', e => {
   const go = e.target.closest('[data-go]');
   if (go && $('#v-play').hidden) show(go.dataset.go);
   const st = e.target.closest('[data-start]');
-  if (st) SC.start(st.dataset.start);
+  if (st) { cfg.homeMode = st.dataset.start; saveCfg(); SC.start(cfg.homeMode); }
 });
+$('#homeStart').addEventListener('click', () => SC.start(cfg.homeMode));
 
 /* ---------- 선생님 모드 ----------
    '선생님' 버튼 → 확인 창 → 버튼을 2초 동안 누르고 있으면 열린다.
@@ -71,16 +72,22 @@ function chipRow(el, opts, key) {
   el.onclick = e => { const b = e.target.closest('.chip'); if (!b) return; cfg[key] = isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v; saveCfg(); renderHome(); };
 }
 function renderHome() {
+  $('#activityPicker').open = false;
+  $('#todayTitle').textContent = MODES[cfg.homeMode].label;
+  $('#todayPic').innerHTML = $(`[data-start="${cfg.homeMode}"] .pic`).outerHTML;
+  $('#homeStart').setAttribute('aria-label', MODES[cfg.homeMode].label + ' 시작하기');
   chipRow($('#q-small'), [[5, '5까지'], [10, '10까지']], 'small');
   chipRow($('#q-range'), [[20, '1~20'], [30, '1~30'], [50, '1~50'], [100, '1~100']], 'range');
   chipRow($('#q-level'), [[1, '옆'], [2, '위아래'], [3, '모두']], 'level');
   chipRow($('#q-answer'), [['choice', '고르기'], ['pad', '키패드']], 'answer');
   /* 먼저-다음 판: 글을 몰라도 그림으로 '공부 다음에 이것' */
-  $('#firstThen').innerHTML = `<span class="ft ft-pic">${ICON.star} 수 공부</span><span aria-hidden="true">→</span><span class="ft then ft-pic">${SC.rewardSvg()} ${esc(SC.rewardLabel())}</span>`;
+  $('#firstThen').innerHTML = `<span class="ft ft-pic"><span>먼저</span>${ICON.star} 수 놀이</span><span aria-hidden="true">→</span><span class="ft then ft-pic"><span>다 하면</span>${SC.rewardSvg()} ${esc(SC.rewardLabel())}</span>`;
 }
 
 /* ---------- 설정 ---------- */
 function fillSettings() {
+  $('#s-homeMode').innerHTML = Object.entries(MODES).map(([k, m]) => `<option value="${k}">${m.label}</option>`).join('');
+  $('#s-homeMode').value = cfg.homeMode;
   const ids = ['range', 'blanks', 'count', 'level', 'help', 'answer', 'small', 'choiceN', 'demo', 'reward', 'mood', 'breakSec', 'share', 'restCards', 'restWait'];
   ids.forEach(k => { $('#s-' + k).value = cfg[k]; });
   ['order', 'sound', 'voice', 'calm', 'flash', 'askBtns', 'offerBreak'].forEach(k => { $('#s-' + k).checked = !!cfg[k]; });

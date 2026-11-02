@@ -112,6 +112,13 @@ const FB_ICON = { good: ICON.star, retry: ICON.again, hint: ICON.eye, ghost: ICO
 function render() {
   if (!G) return;
   const mode = M[G.mode];
+  const tap = G.p.type === 'tap', compare = G.p.type === 'cmp';
+  $('#v-play').dataset.kind = G.p.type;
+  $('#v-play').dataset.action = G.demo ? 'demo' : G.answered ? 'done' : tap ? 'tap' : compare ? 'compare' : G.p.type === 'input' ? 'input' : 'choose';
+  $('#taskMode').textContent = mode.label;
+  $('#stagePrompt').innerHTML = (G.demo ? ICON.eye : tap || compare ? ICON.hand : ICON.eye) + `<span>${G.demo ? '시범을 봐요' : tap ? '하나씩 눌러요' : compare ? '여기에서 골라요' : '잘 봐요'}</span>`;
+  $('#answerPrompt').hidden = tap || compare || G.demo || G.answered;
+  $('#answerPrompt').innerHTML = ICON.hand + `<span>${G.p.type === 'input' ? '숫자를 눌러요' : '여기에서 골라요'}</span>`;
   $('#glyphs').innerHTML = mode.glyphs(G);
   $('#instrText').innerHTML = mode.text(G);
   $('#demoBtn').hidden = G.answered;
@@ -149,6 +156,8 @@ function renderRest() {
 }
 function renderTokens() {
   renderRest();
+  $('#progressLabel').textContent = `${Math.min(G.done + (G.answered ? 0 : 1), G.total)} / ${G.total}`;
+  $('#progressLabel').setAttribute('aria-label', `전체 ${G.total}문제 중 ${G.done}문제 완료`);
   const el = $('#tokens');
   const end = `<span class="tok-end" title="${SC.esc(SC.rewardLabel())}">${SC.rewardSvg()}</span>`;
   if (G.total <= 20) el.innerHTML = range1(G.total).map(i => `<span class="tok${i <= G.done ? ' on' : ''}${i === G.total && G.done === G.total - 1 ? ' last' : ''}"></span>`).join('') + end;

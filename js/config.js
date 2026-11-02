@@ -5,9 +5,10 @@ const DEF = {
   v: 3, range: 50, blanks: 8, order: true, help: 'lots', sound: true, voice: true, calm: false,
   answer: 'choice', choiceN: 2, count: 10, level: 1, small: 5, flash: false, demo: 'first',
   reward: '', rewardIcon: 'block', askBtns: true, mood: 'both', breakSec: 30, share: 'end',
-  offerBreak: true, restCards: 3, restWait: 1
+  offerBreak: true, restCards: 3, restWait: 1, homeMode: 'count'
 };
 const OPTIONS = {
+  homeMode: ['count', 'flash', 'stair', 'ten', 'board', 'near', 'cmp', 'seq'],
   range: [20, 30, 50, 100], count: [5, 10, 15, 20], level: [1, 2, 3], small: [5, 10], choiceN: [2, 3],
   help: ['lots', 'some', 'none'], answer: ['choice', 'pad'], demo: ['first', 'button'],
   mood: ['both', 'start', 'off'], breakSec: [20, 30, 60, 120], share: ['end', 'mid', 'off'],

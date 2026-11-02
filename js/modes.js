@@ -75,7 +75,7 @@ M.count = {
   },
   glyphs: G => G.p.type === 'tap'
     ? g.icon(ICON.hand) + g.n('1') + g.n('2') + g.n('3')
-    : g.icon(ICON.eye) + g.n(`<span class="gdots"><i></i><i></i><i></i></span>`) + g.arrow('', '') + g.q(),
+    : g.icon(ICON.eye) + g.arrow('', '') + g.q(),
   text: G => G.p.type === 'tap' ? '하나씩 눌러서 세어 보세요.' : '모두 몇 개일까요?',
   speak: G => G.p.type === 'tap' ? ['하나씩 눌러서 세어요.'] : ['모두 몇 개예요?', verb()],
   hint: G => G.p.type === 'tap' ? '하나를 누를 때마다 한 번씩 세어요.' : '<b>마지막에 센 수</b>가 모두의 수예요.',
@@ -115,7 +115,7 @@ M.flash = {
     if (!cfg.flash || p.covered || G.answered || G.demo || p.timer) return;
     p.timer = setTimeout(() => { p.timer = null; if (SC.G === G && G.p === p && !G.answered && !G.demo) { p.covered = true; E.render(); } }, 2000);
   },
-  glyphs: () => g.icon(ICON.eye) + g.dots(3) + g.arrow('', '') + g.q(),
+  glyphs: () => g.icon(ICON.eye) + g.arrow('', '') + g.q(),
   text: () => '점이 몇 개일까요?',
   speak: () => ['점이 몇 개예요?', verb()],
   hint: G => G.p.n > 5 && G.p.kind === 'frame' ? '윗줄이 꽉 차면 5예요. <b>5 다음부터</b> 세어요.' : '점을 하나씩 짚으며 세어요.',

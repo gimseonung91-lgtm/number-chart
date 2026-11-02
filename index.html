@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/student.css">
 <link rel="stylesheet" href="css/sheets.css">
 </head>
 <body>
@@ -57,6 +58,15 @@
 
   <!-- 홈 -->
   <main id="v-home" class="no-print">
+    <div class="firstthen" id="firstThen"></div>
+    <section class="today" aria-labelledby="todayTitle">
+      <p class="student-label">오늘의 놀이</p>
+      <div id="todayPic" aria-hidden="true"></div>
+      <h1 id="todayTitle"></h1>
+      <button class="start-task" id="homeStart" data-icon="play">시작하기</button>
+    </section>
+    <details class="activity-picker" id="activityPicker">
+      <summary>다른 놀이 고르기</summary>
     <div class="sec-head">
       <h2>기초 다지기</h2>
       <p class="lede">수 개념이 처음인 학생은 1번부터 차례대로 해요. 화면 놀이 전에 블록 같은 진짜 물건으로 먼저 해 보면 더 좋아요.</p>
@@ -115,13 +125,13 @@
       </button>
     </div>
 
+    </details>
     <div class="quick">
       <div class="grp"><span class="lab">기초 범위 (1~3번)</span><div class="chips" id="q-small"></div></div>
       <div class="grp"><span class="lab">수 범위</span><div class="chips" id="q-range"></div></div>
       <div class="grp"><span class="lab">단계 (이웃 수 · 이어가기)</span><div class="chips" id="q-level"></div></div>
       <div class="grp"><span class="lab">답하는 방법</span><div class="chips" id="q-answer"></div></div>
     </div>
-    <div class="firstthen" id="firstThen"></div>
     <div class="legend" aria-label="색의 뜻">
       <span><i style="background:var(--less)"></i>왼쪽 · 1 작은 수</span>
       <span><i style="background:var(--more)"></i>오른쪽 · 1 큰 수</span>
@@ -135,27 +145,27 @@
   <main id="v-play" class="no-print" hidden>
     <div class="play-top">
       <button class="quit" id="quitBtn" data-icon="home" aria-label="그만하기"></button>
+      <span class="progress-label" id="progressLabel"></span>
       <div class="tokens" id="tokens" aria-label="진행"></div>
-      <!-- SCERTS: 학생이 스스로 요청하는 그림 버튼. 누르면 앱이 학생 대신 소리 내어 말해 준다 -->
-      <div class="asks" id="asks">
-        <button class="ask-btn help" id="askHelpBtn" data-icon="askHelp" aria-label="도와주세요"><span>도와주세요</span></button>
-        <button class="ask-btn rest" id="askRestBtn" aria-label="쉬고 싶어요"><span>쉬고 싶어요</span><span class="rest-cards" id="restCards" aria-hidden="true"></span></button>
-      </div>
     </div>
     <div class="instr">
       <div class="tools">
-        <button class="ibtn" id="speakBtn" data-icon="speaker" aria-label="다시 듣기" title="다시 듣기"></button>
-        <button class="ibtn show" id="demoBtn" data-icon="hand" aria-label="보여 줘" title="보여 줘"></button>
+        <button class="ibtn" id="speakBtn" data-icon="speaker" aria-label="다시 듣기" title="다시 듣기"><span>듣기</span></button>
+        <button class="ibtn show" id="demoBtn" data-icon="hand" aria-label="보여 줘" title="보여 줘"><span>시범 보기</span></button>
       </div>
       <div class="what">
+        <span class="student-label" id="taskMode"></span>
+        <h1 class="txt" id="instrText"></h1>
         <div class="glyphs" id="glyphs" aria-hidden="true"></div>
-        <div class="txt" id="instrText"></div>
       </div>
     </div>
     <div class="play-body">
-      <div class="stage" id="stage"></div>
+      <section class="task-stage" aria-labelledby="stagePrompt">
+        <div class="action-label" id="stagePrompt"></div>
+        <div class="stage" id="stage"></div>
+      </section>
       <div class="side">
-        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        <div class="action-label" id="answerPrompt"></div>
         <div class="choices" id="choices" hidden></div>
         <div class="pad" id="pad" hidden>
           <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
@@ -163,7 +173,12 @@
           <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
           <button data-k="del" class="k-del">지우기</button><button data-k="0">0</button><button data-k="ok" class="k-ok">확인</button>
         </div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
       </div>
+    </div>
+    <div class="asks" id="asks">
+      <button class="ask-btn help" id="askHelpBtn" data-icon="askHelp" aria-label="도와주세요"><span>도와주세요</span></button>
+      <button class="ask-btn rest" id="askRestBtn" aria-label="쉬고 싶어요"><span>쉬고 싶어요</span><span class="rest-cards" id="restCards" aria-hidden="true"></span></button>
     </div>
   </main>
 
@@ -283,6 +298,7 @@
     <div class="panel">
       <h3 class="set-h">학생이 보고 듣는 방법</h3>
       <div class="form">
+        <div class="field"><label for="s-homeMode">시작 화면에 먼저 보여 줄 놀이</label><select id="s-homeMode"></select></div>
         <div class="field"><label for="s-demo">손가락으로 먼저 보여 주기</label>
           <select id="s-demo"><option value="first">놀이를 시작할 때 자동으로</option><option value="button">'보여 줘' 버튼을 누를 때만</option></select>
           <small>손가락이 먼저 풀어 보이고, 같은 문제를 학생이 다시 해요. 놀이 중에도 노란 손 버튼으로 언제든 다시 볼 수 있어요.</small></div>

@@ -11,7 +11,7 @@ test('null settings recover to defaults instead of stopping startup', () => {
 });
 test('invalid setting values cannot reach problem generators', () => {
   const app = stored({ v: 3, range: 0, level: 12, small: -1, choiceN: 100,
-    count: -1, help: 'unknown', sound: 'false', rewardIcon: 'missing', extra: 123 });
+    count: -1, help: 'unknown', sound: 'false', rewardIcon: 'missing', homeMode: 'missing', extra: 123 });
   assert.equal(app.cfg.range, 50);
   assert.equal(app.cfg.level, 1);
   assert.equal(app.cfg.small, 5);
@@ -20,6 +20,7 @@ test('invalid setting values cannot reach problem generators', () => {
   assert.equal(app.cfg.help, 'lots');
   assert.equal(app.cfg.sound, true);
   assert.equal(app.cfg.rewardIcon, 'block');
+  assert.equal(app.cfg.homeMode, 'count');
   assert.equal('extra' in app.cfg, false);
 });
 test('valid v3 preferences and legacy migration are preserved', () => {
