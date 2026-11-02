@@ -1,7 +1,7 @@
 # 수 배열표 놀이 — 작업 기록과 인수인계
 
 > 이 문서는 다음에 이 앱을 고칠 사람(사람이든 인공지능이든)이 **이 파일 하나만 읽고** 지금까지의 요청, 결정, 구조, 점검 방법을 모두 알 수 있도록 쓴 것이다.
-> 마지막 갱신: 2026-10-20
+> 마지막 갱신: 2026-11-02
 
 ---
 
@@ -145,16 +145,19 @@
 수 배열표 앱/
 ├─ index.html          화면 틀 (모든 화면 <main id="v-…">, 스크립트 순서)
 ├─ css/app.css         화면 모양. 뒤쪽에 UDL·선생님 모드·태블릿 구역이 차례로 붙어 있음
+├─ css/student.css     학생용 과제 중심 배치. app.css 뒤·sheets.css 앞에서 로드
 ├─ css/sheets.css      A4 학습지 모양 + @media print 규칙
-├─ js/core.js          공용 도구, 저장(localStorage), 조사 처리, 수 이름, 설정, 효과음, 아이콘
+├─ js/core.js          공용 도구, 저장(localStorage), 조사 처리, 수 이름, 효과음, 아이콘
+├─ js/config.js        설정 기본값, v3 변환, 저장값 검증 → SC.cfg·saveCfg·normalizeCfg
 ├─ js/speech.js        목소리: 녹음 조각 재생(Web Audio) + 기기 목소리 예비, 조각 목록(PHRASES)
 ├─ js/modes.js         놀이 8가지의 정의 + 방향(DIR) + 보기 만들기(makeOpts)
+├─ js/records.js       저장된 학습 기록을 안전하게 읽기 → SC.readRecords
 ├─ js/scerts.js        SCERTS 화면: 기분 묻기(askMood·moodRow), 쉬는 곳(openBreak), 함께 보기(share) → SC.REG
 ├─ js/play.js          놀이 엔진: 세션, 그리기, 입력, 채점, 손가락 시범·안내, 태블릿 처리
 ├─ js/print.js         학습지 8종 생성과 인쇄 화면
 ├─ js/app.js           화면 전환, 홈, 선생님 모드, 설정, 기록
 ├─ audio/clips.js      자동 생성. SC.CLIPS = {조각 이름: mp3 base64} (748개, 약 12MB)
-├─ tools/load.js       node에서 core·speech·modes를 불러오는 도우미
+├─ tools/load.js       node에서 core·config·speech·modes·records를 불러오는 도우미
 ├─ tools/check.js      자동 점검
 ├─ tools/voice_units.js  녹음할 조각 목록 출력 → tools/units.json
 ├─ tools/make_voice.py   edge-tts로 녹음 → audio/clips.js (캐시: tools/voice_cache/)
@@ -167,7 +170,7 @@
 └─ 이전 버전/          4회차 이전 한 파일짜리 앱 백업, `SCERTS 보완 전/`(9회차 직전의 index.html·js·css)
 ```
 
-**스크립트 순서가 중요하다** (`index.html` 끝): `core.js → speech.js → modes.js → scerts.js → play.js → print.js → app.js`. 모두 전역 `window.SC` 하나에 붙는다. ES 모듈을 쓰지 않는 이유: `file://`로 더블클릭해 열 때 모듈은 브라우저가 막는다.
+**스크립트 순서가 중요하다** (`index.html` 끝): `core.js → config.js → speech.js → modes.js → records.js → scerts.js → play.js → print.js → app.js`. 모두 전역 `window.SC` 하나에 붙는다. ES 모듈을 쓰지 않는 이유: `file://`로 더블클릭해 열 때 모듈은 브라우저가 막는다.
 
 ---
 
@@ -175,11 +178,12 @@
 
 ### 5-1. 설정과 저장
 - localStorage 키: `suchart_cfg`(설정), `suchart_rec`(기록, 최근 300개). 모든 읽기·쓰기는 try/catch로 감싸 저장이 막혀도 동작.
-- 설정 기본값(`core.js`의 `DEF`):
+- 설정 기본값(`config.js`의 `DEF`):
 
 | 키 | 기본 | 뜻 |
 |---|---|---|
 | v | 3 | 설정 판. 3이 아닌 저장값을 읽으면 `voice:true`, `answer:'choice'`로 바꿔 줌 |
+| homeMode | 'count' | 시작 화면의 대표 놀이. 교사 설정 또는 다른 놀이 선택으로 갱신 |
 | small | 5 | 기초 놀이 범위 (5 또는 10) |
 | range | 50 | 수 범위 20/30/50/100 (10 묶음·배열표 놀이) |
 | level | 1 | 1=옆(±1), 2=위아래(±10), 3=모두 (이웃 수·이어가기) |
@@ -202,7 +206,8 @@
 | restWait | 1 | 카드를 다 썼거나 방금 쉬었을 때 먼저 할 문제 수 (1~3) |
 
 - 기록 한 건: `{t, mode, total, done(실제로 푼 수), first(처음에 맞힌 수), hinted(힌트 후 맞힘), prompted(정답 따라 누름), askHelp, askRest(학생 요청 수), restWaited(먼저 문제를 하고 쉰 횟수), offers(쉬기 권유), demos(다시 본 시범), moodStart, moodEnd, stopped?, range, level, help, small}`. 9회차 이전 기록에는 done 이후 항목이 없으며, 화면은 `done ?? total`로 다룬다.
-- 새 설정 키는 `DEF`에 기본값만 더했다(`Object.assign`으로 채워지므로 `v`는 올리지 않음).
+- 새 설정 키를 추가할 때는 `config.js`의 `DEF`와 `OPTIONS` 또는 `normalizeCfg`의 해당 타입 처리를 함께 수정한다. 저장값은 허용 목록을 통과한 항목만 사용하며, 잘못된 항목은 기본값을 사용한다. `SC.cfg` 객체 자체는 교체하지 않는다.
+- 기록은 `SC.readRecords()`로 읽는다. 배열이 아닌 저장값은 빈 목록으로 다루고, 잘못된 개별 기록은 제외한다. 기존 기록의 `done`·SCERTS 관찰 항목은 계속 선택 사항이다. 읽기만으로 저장소를 덮어쓰지 않으며, 새 기록 저장과 기분 갱신은 검증된 목록을 사용한다.
 
 ### 5-2. 놀이 정의 (modes.js) — 새 놀이는 이 약속만 지키면 된다
 `SC.MODES[이름] = { … }`
