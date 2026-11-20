@@ -5,10 +5,13 @@ const DEF = {
   v: 3, range: 50, blanks: 8, order: true, help: 'lots', sound: true, voice: true, calm: false,
   answer: 'choice', choiceN: 2, count: 10, level: 1, small: 5, flash: false, demo: 'first',
   reward: '', rewardIcon: 'block', askBtns: true, mood: 'both', breakSec: 30, share: 'end',
-  offerBreak: true, restCards: 3, restWait: 1, homeMode: 'count'
+  offerBreak: true, restCards: 3, restWait: 1, homeMode: 'count',
+  /* 12회차: 순서와 뛰어 세기, 학습 단계 경로 (step -1 = 단계 경로를 쓰지 않음) */
+  orderAsk: 'both', wrapView: 'fold', skipBy: 2, skipOdd: false, step: -1, advance: 'teacher'
 };
 const OPTIONS = {
-  homeMode: ['count', 'flash', 'stair', 'ten', 'board', 'near', 'cmp', 'seq'],
+  homeMode: ['count', 'flash', 'stair', 'ten', 'board', 'near', 'cmp', 'seq', 'order', 'wrap', 'skip'],
+  orderAsk: ['both', 'next', 'prev'], wrapView: ['fold', 'line', 'grid'], skipBy: [2, 5, 10], advance: ['teacher', 'suggest'],
   range: [20, 30, 50, 100], count: [5, 10, 15, 20], level: [1, 2, 3], small: [5, 10], choiceN: [2, 3],
   help: ['lots', 'some', 'none'], answer: ['choice', 'pad'], demo: ['first', 'button'],
   mood: ['both', 'start', 'off'], breakSec: [20, 30, 60, 120], share: ['end', 'mid', 'off'],
@@ -24,6 +27,7 @@ function normalizeCfg(value) {
     else if (typeof DEF[key] === 'boolean' && typeof v === 'boolean') next[key] = v;
     else if (key === 'blanks' && Number.isInteger(v)) next[key] = SC.clamp(v, 1, 99);
     else if (key === 'reward' && typeof v === 'string') next[key] = v.slice(0, 20);
+    else if (key === 'step' && Number.isInteger(v) && v >= -1 && v < (SC.PATH || []).length) next[key] = v;
   }
   // 이전 판 설정에서는 소리 안내와 고르기를 켜던 기존 마이그레이션을 유지한다.
   if (saved.v !== DEF.v) { next.voice = true; next.answer = 'choice'; }

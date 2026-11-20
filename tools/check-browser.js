@@ -72,14 +72,14 @@ test('invalid record containers do not crash records or print views', async t =>
 
 test('eight games, completion, saved records and eight worksheets work offline', async t => {
   const { page, errors } = await openPage(t);
-  const modes = ['count', 'flash', 'stair', 'ten', 'board', 'near', 'cmp', 'seq'];
+  const modes = ['count', 'flash', 'stair', 'ten', 'board', 'near', 'cmp', 'seq', 'order', 'wrap', 'skip'];
   for (const mode of modes) {
     await startMode(page, mode);
     await answer(page);
     assert.equal(await page.evaluate(() => SC.G.done), 1, mode);
     await stop(page);
   }
-  assert.equal(await page.evaluate(() => SC.readRecords().length), 8);
+  assert.equal(await page.evaluate(() => SC.readRecords().length), 11);
   await teacher(page);
   await page.locator('.nav [data-go="settings"]').click();
   await page.locator('#s-count').selectOption('5');
@@ -99,7 +99,7 @@ test('eight games, completion, saved records and eight worksheets work offline',
   await page.locator('#v-done [data-go="home"]').click();
   await teacher(page);
   await page.locator('.nav [data-go="records"]').click();
-  assert.equal(await page.locator('#recBody tr').count(), 9);
+  assert.equal(await page.locator('#recBody tr').count(), 12);
   await page.locator('#recBody [data-rec="0"]').click();
   assert.equal(await page.locator('#pTypes [aria-checked="true"]').getAttribute('data-ptype'), 'cmp');
   await page.locator('#p-pages').selectOption('2');
@@ -126,7 +126,7 @@ test('responsive screenshots cover all views and learning modes', async t => {
       captures.push(file);
     };
     await capture('home');
-    for (const mode of ['count', 'flash', 'stair', 'ten', 'board', 'near', 'cmp', 'seq']) {
+    for (const mode of ['count', 'flash', 'stair', 'ten', 'board', 'near', 'cmp', 'seq', 'order', 'wrap', 'skip']) {
       await startMode(page, mode);
       await capture(`play-${mode}`);
       if (mode === 'count') {
@@ -206,7 +206,7 @@ test('largest tasks stay within the viewport in both answer modes and themes', a
     await page.setViewportSize({ width, height: 900 });
     for (const answer of ['choice', 'pad']) {
       await page.evaluate(answer => Object.assign(SC.cfg, { small: 10, range: 100, level: 3, choiceN: 3, answer, help: 'lots' }), answer);
-      for (const mode of ['count', 'flash', 'stair', 'ten', 'board', 'near', 'cmp', 'seq']) {
+      for (const mode of ['count', 'flash', 'stair', 'ten', 'board', 'near', 'cmp', 'seq', 'order', 'wrap', 'skip']) {
         await startMode(page, mode);
         const overflow = await page.evaluate(() => {
           if (document.documentElement.scrollWidth <= innerWidth) return [];

@@ -375,6 +375,142 @@ M.seq = {
   look: G => [{ sel: '.seq', say: [Math.abs(G.p.s) + '씩', G.p.s > 0 ? '커져요.' : '작아져요.'] }]
 };
 
+/* ====================== 순서와 뛰어 세기 (12회차) ======================
+   학생은 줄 끝(10)에서 다음 줄 맨 앞(11)으로 넘어가면 '다음 수'인 것을 놓쳤고, '다음'·'전'이라는 말도 어려워했다.
+   - 다음 수, 전 수: 한 줄 기차 위에서 '다음' = 오른쪽 = 1 큰 수(주황), '전' = 왼쪽 = 1 작은 수(파랑)
+   - 줄 이어 읽기: 한 줄 띠(펼침) → 띠와 배열표를 함께(접힘) → 배열표만. 줄 끝에서 꺾이는 길을 보여 준다
+   - 뛰어 세기: 2씩·5씩·10씩. 지나온 칸을 색으로 남겨 무늬가 보이게 */
+const WORD = { next: { rel: '다음 수', w: '다음', cls: 'dr', arrow: '→', d: 1, say: '다음 수를', is: '다음 수예요.', rule: '다음 수는 1 큰 수예요.' },
+  prev: { rel: '전 수', w: '전', cls: 'dl', arrow: '←', d: -1, say: '전 수를', is: '전 수예요.', rule: '전 수는 1 작은 수예요.' } };
+const rowStart = n => Math.floor((n - 1) / 10) * 10 + 1;
+
+/* 다음 수, 전 수 — 순서 낱말을 방향·색·1 큰/작은 수와 하나로 묶는다 */
+M.order = {
+  label: '다음 수, 전 수',
+  gen(G) {
+    const R = Math.max(G.R, 20); let ask, c, t = 0;
+    do {
+      ask = cfg.orderAsk === 'both' ? (Math.random() < .5 ? 'next' : 'prev') : cfg.orderAsk;
+      /* 셋 중 하나쯤은 줄 끝(다음)·줄 맨 앞(전) 수로 낸다: 배열표에서 줄이 바뀌는 자리 */
+      const edge = Math.random() < .35, rows = range1(Math.floor((R - 1) / 10));
+      if (ask === 'next') c = edge ? pick(rows.map(k => k * 10)) : rnd(1, R - 1);
+      else c = edge ? pick(rows.map(k => k * 10 + 1)) : rnd(2, R);
+      t++;
+    } while (G.prev === c + ask && t < 40);
+    G.prev = c + ask; const W = WORD[ask], ans = c + W.d;
+    return { type: 'input', c, ask, ans, distract: [c - W.d, ans + W.d, c] };
+  },
+  stage(G, E) {
+    const p = G.p, W = WORD[p.ask], R = Math.max(G.R, 20), lo = Math.max(1, p.c - 3), hi = Math.min(R, p.c + 3);
+    let h = '<div class="train" aria-label="수 기차">';
+    for (let x = lo; x <= hi; x++) {
+      if (x === p.ans) h += `<div class="car ask ${W.cls}${G.answered ? ' just' : ''}"><span class="tag">${W.arrow} ${W.w}</span>${E.slot()}</div>`;
+      else if (x === p.c) h += `<div class="car k">${x}</div>`;
+      else h += `<div class="car${cfg.help === 'none' && !G.answered ? ' hide' : ''}">${x}</div>`;
+    }
+    return h + '</div>';
+  },
+  glyphs(G) {
+    const W = WORD[G.p.ask], a = g.arrow(W.cls, W.w, W.arrow), c = g.n(G.p.c, 'k');
+    return G.p.ask === 'prev' ? g.q() + a + c : c + a + g.q();
+  },
+  text: G => `${G.p.c} <b class="${WORD[G.p.ask].cls}">${WORD[G.p.ask].rel}</b>는?`,
+  speak: G => [String(G.p.c), WORD[G.p.ask].say, verb()],
+  hint: G => `<b class="${WORD[G.p.ask].cls}">${WORD[G.p.ask].rel}</b>는 ${G.p.ask === 'next' ? '오른쪽, 1 큰 수' : '왼쪽, 1 작은 수'}예요.`,
+  hintSay: G => [WORD[G.p.ask].rule],
+  goodSay: G => ['맞았어요!', EUN(G.p.ans), String(G.p.c), WORD[G.p.ask].is],
+  good: G => `<strong>맞았어요!</strong> ${EUN(G.p.ans)} ${G.p.c} ${WORD[G.p.ask].rel}예요.`,
+  look: G => [{ sel: '.car.k', say: [G.p.c + '.'] }, { sel: '.car.ask', say: [WORD[G.p.ask].rule] }]
+};
+
+/* 줄 이어 읽기 — 줄 끝 수의 다음 수는 아랫줄 맨 앞에 있다 */
+M.wrap = {
+  label: '줄 이어 읽기',
+  gen(G) {
+    const R = Math.max(G.R, 20), ends = range1(R / 10 - 1).map(k => k * 10); let c, t = 0;
+    do {
+      /* 넷 중 셋은 줄 끝, 하나는 줄 안쪽(바로 오른쪽 칸)과 견주어 보게 */
+      const e = pick(ends);
+      c = Math.random() < .75 ? e : e - rnd(1, 3);
+      t++;
+    } while (c === G.prev && t < 30);
+    G.prev = c; const ans = c + 1, end = c % 10 === 0;
+    return { type: 'input', c, ans, end, distract: end ? [c - 9, c + 10, c + 2] : [c - 1, c + 10, c + 2] };
+  },
+  stage(G, E) {
+    const p = G.p, view = cfg.wrapView, R = Math.max(G.R, 20);
+    const cellOf = (x, base, at) => { const st = at ? ` style="grid-area:${at}"` : '';
+      return x === p.ans ? `<span class="${base} cur${G.answered ? ' just' : ''}"${st}>${E.slot()}</span>` : `<span class="${base}${x === p.c ? ' k' : ''}"${st}>${x}</span>`; };
+    let h = '<div class="wrapbox">';
+    if (view !== 'grid') {
+      const lo = Math.max(1, p.c - 4), hi = Math.min(R, p.c + 4);
+      h += `<div class="wline" aria-label="한 줄 수 띠">${range1(hi - lo + 1).map(i => cellOf(lo + i - 1, 'wl')).join('')}</div>`;
+    }
+    if (view !== 'line') {
+      const r1 = rowStart(p.c), turn = view === 'fold' || E.showHint() || G.answered;
+      h += `<div class="wgrid${turn ? ' turn' : ''}${G.answered ? ' go' : ''}" aria-label="수 배열표 두 줄">`;
+      for (let j = 0; j < 10; j++) h += cellOf(r1 + j, 'wc', `1/${j + 2}`);
+      h += '<span class="wbar" aria-hidden="true"></span>';
+      for (let j = 0; j < 10; j++) h += cellOf(r1 + 10 + j, 'wc', `3/${j + 2}`);
+      h += '<svg class="wt wt-r" viewBox="0 0 26 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 24 H12 Q22 24 22 34 V40 Q22 50 12 50 H0" vector-effect="non-scaling-stroke"/></svg>'
+        + '<svg class="wt wt-l" viewBox="0 0 26 100" preserveAspectRatio="none" aria-hidden="true"><path d="M26 50 H14 Q4 50 4 60 V66 Q4 76 14 76 H24" vector-effect="non-scaling-stroke"/></svg></div>';
+    }
+    return h + '</div>';
+  },
+  glyphs: G => g.n(G.p.c, 'k') + g.arrow('dr', '다음', G.p.end ? '↩' : '→') + g.q(),
+  text: G => `${G.p.c} <b class="dr">다음 수</b>는?${G.p.end ? ' (줄 끝 → 아랫줄 맨 앞)' : ''}`,
+  speak: G => [String(G.p.c), '다음 수를', verb()],
+  hint: G => G.p.end ? '줄 끝에서는 <b>아랫줄 맨 앞</b>으로 가요.' : '<b class="dr">다음 수</b>는 바로 오른쪽 칸이에요.',
+  hintSay: G => [G.p.end ? '줄 끝에서는 아랫줄 맨 앞으로 가요.' : '다음 수는 바로 오른쪽 칸이에요.'],
+  goodSay: G => ['맞았어요!', EUN(G.p.ans), String(G.p.c), '다음 수예요.', ...(G.p.end ? ['줄이 바뀌어도 수는 이어져요.'] : [])],
+  good: G => `<strong>맞았어요!</strong> ${EUN(G.p.ans)} ${G.p.c} 다음 수예요.${G.p.end ? ' 줄이 바뀌어도 수는 이어져요.' : ''}`,
+  look(G) {
+    const grid = cfg.wrapView !== 'line', out = [{ sel: grid ? '.wc.k' : '.wl.k', say: [G.p.c + '.'] }];
+    if (G.p.end && grid) out.push({ sel: '.wt-r', say: ['줄 끝에서는 아랫줄 맨 앞으로 가요.'] });
+    out.push({ sel: grid ? '.wc.cur' : '.wl.cur', say: ['다음 수예요.'] });
+    return out;
+  }
+};
+
+/* 뛰어 세기 — 2씩·5씩·10씩. 지나온 칸이 색으로 남아 수 배열표의 무늬가 보인다 */
+const SKIP_HINT = { 2: '두 칸 뛰어요.', 5: '다섯 칸 뛰어요.', 10: '바로 아래 칸이에요.' };
+const skipBase = s => s === 2 ? (cfg.skipOdd ? 1 : 2) : s === 5 ? 5 : rnd(1, 10);
+M.skip = {
+  label: '뛰어 세기',
+  gen(G) {
+    const s = cfg.skipBy, R = Math.max(G.R, 20); let b, k, t = 0;
+    do {
+      b = skipBase(s);
+      k = rnd(1, Math.max(1, Math.floor((R - b) / s)));   /* 정답 b + s·k 는 늘 R 안 */
+      t++;
+    } while (G.prev === b * 1000 + k && t < 40);
+    G.prev = b * 1000 + k;
+    const ans = b + s * k, cur = ans - s;
+    return { type: 'input', s, b, cur, ans, distract: s === 10 ? [cur + 1, ans + 1, ans - 1] : [cur + 1, ans + 1, ans - 1, ans + s] };
+  },
+  stage(G, E) {
+    const p = G.p, R = Math.max(G.R, 20), show = E.showHint() || G.answered;
+    let h = `<div class="board skipb ${p.s === 10 ? 'dd' : 'dr'}" aria-label="수 배열표 뛰어 세기">`;
+    for (let n = 1; n <= R; n++) {
+      let c = 'cell' + ((n - 1) % 10 === 4 ? ' c5' : ''), txt = n;
+      if (n === p.ans) { c += ' cur'; txt = E.slot() === '?' ? '' : E.slot(); }
+      else if (n === p.cur) c += ' hop k';
+      else if (n >= p.b && n < p.cur && (n - p.b) % p.s === 0) c += ' hop';
+      else if (show && n > p.cur && n < p.ans) c += ' pass';
+      h += `<div class="${c}" data-v="${n}">${txt}</div>`;
+    }
+    return h + '</div>';
+  },
+  glyphs: G => g.n(G.p.cur, 'k') + g.arrow(G.p.s === 10 ? 'dd' : 'dr', '+' + G.p.s, G.p.s === 10 ? '↓' : '→') + g.q(),
+  text: G => `${G.p.cur}보다 <b class="${G.p.s === 10 ? 'dd' : 'dr'}">${G.p.s} 큰 수</b>는? (${G.p.s}씩 뛰어 세기)`,
+  speak: G => [G.p.cur + '보다', G.p.s + ' 큰 수를', verb()],
+  hint: G => `${G.p.s}씩 뛰어요. ${G.p.s === 10 ? '<b>바로 아래 칸</b>이에요.' : `<b>${G.p.s}칸</b> 뛰어요.`}`,
+  hintSay: G => [SKIP_HINT[G.p.s]],
+  goodSay: G => ['맞았어요!', EUN(G.p.ans), G.p.cur + '보다', G.p.s + ' 커요.', G.p.s + '씩 뛰어 세어요.'],
+  good: G => `<strong>맞았어요!</strong> ${EUN(G.p.ans)} ${G.p.cur}보다 ${G.p.s} 커요.`,
+  look: G => [{ sel: '.cell.k', say: [G.p.cur + '.'] }, { sel: '.cell.cur', say: [SKIP_HINT[G.p.s]] }]
+};
+
 /* 고르기 보기: 정답 + 헷갈리기 쉬운 수(놀이마다 정한 distract 먼저), 모두 1~top 안에서 서로 다르게 */
 function makeOpts(p, R) {
   const top = Math.max(R, 10, cfg.small), out = [], want = cfg.choiceN - 1;

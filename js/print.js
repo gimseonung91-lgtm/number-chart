@@ -12,7 +12,10 @@ const TYPES = [
   ['board', '수 배열표 채우기', '빈칸에 수 쓰기'],
   ['near', '이웃 수 찾기', '십자 모양 빈칸 채우기'],
   ['cmp', '더 큰 수, 더 작은 수', '큰 수 · 작은 수에 ○표'],
-  ['seq', '수 이어가기', '규칙대로 빈칸 채우기']
+  ['seq', '수 이어가기', '규칙대로 빈칸 채우기'],
+  ['order', '다음 수, 전 수', '다음 수 · 전 수 쓰기 (설정의 낱말)'],
+  ['wrap', '줄 이어 읽기', '줄 끝 다음부터 아랫줄 이어 쓰기'],
+  ['skip', '뛰어 세기', '뛰어 세며 빈칸 쓰고 색칠 (설정의 간격)']
 ];
 let ptype = 'count';
 function renderTypes() {
@@ -123,6 +126,41 @@ const SHEETS = {
       (i > 0 ? `<i>→${o.help ? '<br>' + stepText(r.s) : ''}</i>` : '') + `<span class="n">${r.miss.has(i) ? ansSpan(ans, x) : x}</span>`).join('')}</div>`).join('')}</div></div>`);
   }
 };
+
+/* 12회차 학습지: 다음 수·전 수, 줄 이어 읽기, 뛰어 세기 */
+Object.assign(SHEETS, {
+  order(o) {
+    const R = Math.max(o.R, 20), rows = range1(10).map(() => {
+      const ask = cfg.orderAsk === 'both' ? pick(['next', 'prev']) : cfg.orderAsk;
+      const c = ask === 'next' ? rnd(1, R - 1) : rnd(2, R);
+      return { ask, c, a: c + (ask === 'next' ? 1 : -1) };
+    });
+    const word = ask => ask === 'next' ? '<i class="sh-w next">다음 수 →</i>' : '<i class="sh-w prev">← 전 수</i>';
+    return pair('다음 수와 전 수를 써 봅시다. (다음 수는 1 큰 수, 전 수는 1 작은 수)', ans => `<div class="sh-body"><div class="sh-seq">${rows.map((r, i) => `<div class="sh-row"><span class="no">${i + 1}.</span>${r.ask === 'next'
+      ? `<span class="n">${r.c}</span>${word('next')}<span class="n">${ansSpan(ans, r.a)}</span>`
+      : `<span class="n">${ansSpan(ans, r.a)}</span>${word('prev')}<span class="n">${r.c}</span>`}</div>`).join('')}</div></div>`);
+  },
+  wrap(o) {
+    const R = Math.max(o.R, 20), starts = sample(range1(R / 10 - 1).map(k => (k - 1) * 10 + 1), Math.min(4, R / 10 - 1)).sort((a, b) => a - b);
+    const tbl = (r1, ans) => `<div class="sh-wrap"><table class="sh-board"><tr>${range1(10).map(j => `<td>${r1 + j - 1}</td>`).join('')}</tr>
+      <tr>${range1(10).map(j => { const n = r1 + 9 + j; return `<td>${j <= 3 ? ansSpan(ans, n) : (o.help ? n : ansSpan(ans, n))}</td>`; }).join('')}</tr></table><span class="sh-turn" aria-hidden="true">↩</span></div>`;
+    return pair('줄 끝 수 다음부터 아랫줄 맨 앞으로 이어서 수를 써 봅시다.', ans => `<div class="sh-body">${starts.map((r1, i) => `<div class="sh-item"><span class="no">${i + 1}.</span>${tbl(r1, ans)}</div>`).join('')}</div>`);
+  },
+  skip(o) {
+    const R = Math.max(o.R, 20), s = cfg.skipBy, b = s === 2 ? (cfg.skipOdd ? 1 : 2) : s === 5 ? 5 : rnd(1, 10);
+    const hop = n => n >= b && (n - b) % s === 0, shown = new Set(range1(R).filter(hop).slice(0, 2));
+    const tbl = ans => {
+      let h = '<table class="sh-board">';
+      for (let r = 0; r < R / 10; r++) {
+        h += '<tr>';
+        for (let c = 1; c <= 10; c++) { const n = r * 10 + c; h += `<td class="${c === 5 ? 'c5' : ''}${hop(n) && (ans || shown.has(n)) ? ' sh-hop' : ''}">${hop(n) && !shown.has(n) ? ansSpan(ans, n) : n}</td>`; }
+        h += '</tr>';
+      }
+      return h + '</table>';
+    };
+    return pair(`${b}부터 ${s}씩 뛰어 세며 빈칸에 수를 쓰고 색칠해 봅시다.`, ans => `<div class="sh-body">${tbl(ans)}</div>`);
+  }
+});
 
 function buildPrint() {
   const o = P(), t = o.type;

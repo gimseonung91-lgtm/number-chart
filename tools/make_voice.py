@@ -39,7 +39,13 @@ async def make(text, sem):
 
 async def main():
     pairs = json.load(io.open(os.path.join(ROOT, 'tools', 'units.json'), encoding='utf-8'))  # [찾는 이름, 녹음할 글]
-    units = [t for _, t in pairs]
+    # 이미 audio/clips.js에 있는 조각은 그대로 쓴다 (voice_cache가 비어 있어도 새 조각만 녹음하도록)
+    old = {}
+    if os.path.exists(OUT) and '--fresh' not in sys.argv:
+        src = io.open(OUT, encoding='utf-8').read()
+        old = json.loads(src[src.index('SC.CLIPS = ') + 11:].strip().rstrip(';'))
+    pairs_new = [(k, t) for k, t in pairs if k not in old]
+    units = [t for _, t in pairs_new]
     os.makedirs(CACHE, exist_ok=True)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     sem = asyncio.Semaphore(6)
@@ -50,7 +56,7 @@ async def main():
         await asyncio.gather(*(make(u, sem) for u in todo[i:i + 30]))
         done += len(todo[i:i + 30])
         print(f'  {done}/{len(todo)}', flush=True)
-    clips = {k: base64.b64encode(open(cache_path(t), 'rb').read()).decode('ascii') for k, t in pairs}
+    clips = {k: old[k] if k in old else base64.b64encode(open(cache_path(t), 'rb').read()).decode('ascii') for k, t in pairs}
     with io.open(OUT, 'w', encoding='utf-8') as f:
         f.write('/* 자동 생성 파일 — tools/make_voice.py로 다시 만든다. 신경망 음성 ' + VOICE + ' */\n')
         f.write('window.SC = window.SC || {};\nSC.CLIPS = ')

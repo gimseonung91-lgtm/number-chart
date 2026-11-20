@@ -14,6 +14,6 @@ module.exports = function load(options = {}) {
   };
   ctx.window = ctx;
   vm.createContext(ctx);
-  for (const f of ['core.js', 'config.js', 'speech.js', 'modes.js', 'records.js']) vm.runInContext(fs.readFileSync(path.join(root, 'js', f), 'utf8'), ctx, { filename: f });
+  for (const f of ['core.js', 'path.js', 'config.js', 'speech.js', 'modes.js', 'records.js']) vm.runInContext(fs.readFileSync(path.join(root, 'js', f), 'utf8'), ctx, { filename: f });
   return ctx.SC;
 };

@@ -21,6 +21,8 @@ function readRecords() {
       if (r[k] != null) record[k] = r[k];
     }
     if (r.stopped === true) record.stopped = true;
+    /* 12회차: 학습 단계 번호 (단계 제안의 근거) */
+    if (Number.isInteger(r.step) && r.step >= 0 && r.step < (SC.PATH || []).length) record.step = r.step;
     for (const k of ['moodStart', 'moodEnd']) {
       if (['good', 'soso', 'hard'].includes(r[k])) record[k] = r[k];
     }
