@@ -50,6 +50,7 @@
     <p class="lede">학생이 앱에서 배운 내용을 종이 학습지로 다시 풀어 보게 할 수 있어요. 학습지는 이 컴퓨터에 연결된 프린터로 인쇄돼요.</p>
     <div class="t-grid">
       <button class="t-card main" data-go="print"><span class="t-ic" data-icon="print"></span><span class="t-tt">학습지 인쇄</span><span class="t-dd">놀이 8가지에 맞춘 A4 학습지와 정답지</span></button>
+      <button class="t-card" data-go="path"><span class="t-ic" data-icon="chart"></span><span class="t-tt">학습 단계</span><span class="t-dd" id="pathCardNote">지도 순서에 따른 20단계와 다음 단계 제안</span></button>
       <button class="t-card" data-go="records"><span class="t-ic" data-icon="chart"></span><span class="t-tt">학습 기록</span><span class="t-dd">놀이별로 처음에 맞힌 비율</span></button>
       <button class="t-card" data-go="settings"><span class="t-ic" data-icon="gear"></span><span class="t-tt">설정</span><span class="t-dd">도움 정도, 보기 개수, 소리, 범위</span></button>
       <button class="t-card" id="studentStart"><span class="t-ic" data-icon="play"></span><span class="t-tt">학생 화면 시작</span><span class="t-dd">선생님 메뉴를 닫고 전체 화면으로 놀이를 열어요</span></button>
@@ -122,6 +123,28 @@
         <span class="pic s" aria-hidden="true"><span>5</span><span>6</span><span class="q">?</span><span>8</span></span>
         <span class="mt">수 이어가기</span>
         <span class="md">규칙대로 이어지는 수에서 빈칸을 채워요.</span>
+      </button>
+    </div>
+
+    <div class="sec-head">
+      <h2>순서와 뛰어 세기</h2>
+      <p class="lede">'다음'·'전'의 뜻, 줄 끝에서 아랫줄 맨 앞으로 이어지는 수, 2씩·5씩·10씩 뛰어 세기를 익혀요.</p>
+    </div>
+    <div class="home-grid">
+      <button class="mode" data-start="order">
+        <span class="pic s" aria-hidden="true"><span>6</span><span class="q dr">→</span><span class="q">?</span></span>
+        <span class="mt">다음 수, 전 수</span>
+        <span class="md">다음 수는 오른쪽, 1 큰 수(주황). 전 수는 왼쪽, 1 작은 수(파랑).</span>
+      </button>
+      <button class="mode" data-start="wrap">
+        <span class="pic b" aria-hidden="true"><span>8</span><span>9</span><span>10</span><span class="e">↩</span><span class="q">?</span><span>12</span><span>13</span><span>14</span></span>
+        <span class="mt">줄 이어 읽기</span>
+        <span class="md">줄 끝 수의 다음 수는 아랫줄 맨 앞에 있어요. 줄이 바뀌어도 수는 이어져요.</span>
+      </button>
+      <button class="mode" data-start="skip">
+        <span class="pic s" aria-hidden="true"><span>2</span><span>4</span><span>6</span><span class="q">?</span></span>
+        <span class="mt">뛰어 세기</span>
+        <span class="md">2씩, 5씩, 10씩 뛰어 세며 2 큰 수, 10 큰 수를 찾아요.</span>
       </button>
     </div>
 
@@ -274,6 +297,22 @@
     <div class="sheets" id="sheets"></div>
   </main>
 
+  <!-- 학습 단계 -->
+  <main id="v-path" class="no-print" hidden>
+    <h2>학습 단계</h2>
+    <p class="lede">수 개념 지도 순서대로 놀이를 묶었어요. 단계를 고르면 그 단계의 놀이가 학생 시작 화면에 나오고, 범위·낱말·간격 설정이 맞춰져요. 화면 놀이 전후에 블록·수 띠 같은 진짜 물건으로도 해 주세요.</p>
+    <div class="panel">
+      <div class="form">
+        <div class="field"><label for="s-advance">다음 단계로 넘어가는 방법</label>
+          <select id="s-advance"><option value="teacher">선생님이 직접 정하기</option><option value="suggest">앱이 기록을 보고 제안하기 (선생님이 확인 후 바꾸기)</option></select>
+          <small id="pathRule"></small></div>
+      </div>
+      <div id="pathSuggest"></div>
+      <div id="pathList"></div>
+      <div class="print-actions"><button class="btn ghosty" id="pathOff">단계 경로 쓰지 않기</button><span class="small-note" id="pathNote"></span></div>
+    </div>
+  </main>
+
   <!-- 기록 -->
   <main id="v-records" class="no-print" hidden>
     <h2>학습 기록</h2>
@@ -362,6 +401,15 @@
           <small>위쪽 동그라미로 남은 수가 보여요. 끝이 보이도록 짧게 해요.</small></div>
         <div class="field"><label for="s-level">단계 (이웃 수 · 이어가기)</label>
           <select id="s-level"><option value="1">1단계 · 옆 (1 작은 수, 1 큰 수)</option><option value="2">2단계 · 위아래 (10 작은 수, 10 큰 수)</option><option value="3">3단계 · 모두 섞기</option></select></div>
+        <div class="field"><label for="s-orderAsk">다음 수, 전 수: 묻는 낱말</label>
+          <select id="s-orderAsk"><option value="next">'다음 수'만</option><option value="prev">'전 수'만</option><option value="both">둘 다 섞기</option></select>
+          <small>한 낱말씩 먼저 익힌 뒤 섞어요. '다음'은 늘 주황·오른쪽, '전'은 늘 파랑·왼쪽이에요.</small></div>
+        <div class="field"><label for="s-wrapView">줄 이어 읽기: 보여 주는 모양</label>
+          <select id="s-wrapView"><option value="line">한 줄 띠만 (펼친 띠)</option><option value="fold">띠와 배열표 두 줄 함께 (접는 길 보임)</option><option value="grid">배열표 두 줄만 (힌트 때 길 보임)</option></select></div>
+        <div class="field"><label for="s-skipBy">뛰어 세기: 간격</label>
+          <select id="s-skipBy"><option value="10">10씩 (바로 아래 칸)</option><option value="2">2씩</option><option value="5">5씩</option></select>
+          <label class="check"><input type="checkbox" id="s-skipOdd"> 2씩 뛰기를 1, 3, 5…(홀수)로 시작</label>
+          <small>10씩은 줄이 바뀌지 않아 가장 쉬워요. 2씩은 짝수(2, 4, 6…)부터 해요.</small></div>
         <div class="field"><label for="s-blanks">수 배열표 빈칸 개수</label>
           <input id="s-blanks" type="number" min="1" max="99">
           <label class="check"><input type="checkbox" id="s-order"> 작은 수부터 차례대로 채우기</label></div>
@@ -405,11 +453,22 @@
           <li><b>4. 10 묶음</b>: "23은 20과 3". 수 배열표에서 아래로 한 칸이 10 큰 수인 까닭이에요.</li>
         </ul>
       </details>
+      <details class="why">
+        <summary>순서 낱말 · 줄 이어 읽기 · 뛰어 세기를 이렇게 지도해요</summary>
+        <ul>
+          <li><b>낱말은 '다음'과 '전' 두 개만</b>: '앞'은 생활에서 '앞쪽'과 헷갈려 쓰지 않아요. '다음' = 오른쪽 = 1 큰 수 = 주황, '전' = 왼쪽 = 1 작은 수 = 파랑으로 늘 같게 보여 주고 들려줘요. 한 낱말씩 익힌 뒤 섞어요.</li>
+          <li><b>구체물 먼저</b>: 기차 놀이(칸에 수 카드 붙이기)로 "6 다음 칸", "6 전 칸"을 몸으로 해 본 뒤 화면 놀이로 옮겨요.</li>
+          <li><b>줄 이어 읽기 3단계</b>: ① 1~20 수 띠를 길게 펼쳐 10 다음에 11이 바로 붙어 있음을 보고 → ② 띠를 10칸마다 접어 배열표가 되는 모습을 보며(화면의 꺾이는 주황 길) → ③ 배열표만 보고 줄 끝 다음 수를 찾아요. 실제 종이 띠를 가위로 잘라 붙여 배열표를 만들어 보면 더 좋아요.</li>
+          <li><b>뛰어 세기 순서</b>: 10씩(바로 아래 칸, 줄이 바뀌지 않음) → 2씩 짝수 → 5씩 → 2씩 홀수. 지나온 칸이 색으로 남아 배열표의 무늬(세로줄, 지그재그)가 보여요. 학습지 '뛰어 세기'로 색칠하며 다시 해요.</li>
+          <li><b>학습 단계</b>: 선생님 홈의 '학습 단계'에서 20단계 중 하나를 고르면 그 놀이와 설정이 맞춰져요. 다음 단계로 넘어가는 방법은 '직접 정하기'와 '앱이 제안하기' 중에서 골라요. 제안하기를 써도 학생 화면은 저절로 바뀌지 않고, 선생님이 확인하고 눌러야 바뀌어요(예고 없는 변화를 막기 위해).</li>
+        </ul>
+      </details>
     </div>
   </main>
 </div>
 
 <script src="js/core.js"></script>
+<script src="js/path.js"></script>
 <script src="js/config.js"></script>
 <script src="js/speech.js"></script>
 <script src="js/modes.js"></script>

@@ -71,3 +71,12 @@ table.sh-board tr.r5 td{border-bottom:2.5px solid #000}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 
+
+/* 12회차 학습지 */
+.sh-w{font-style:normal;font-weight:700;padding:0 4px}
+.sh-w.next{color:#B8470F} .sh-w.prev{color:#2459B8}
+.sh-wrap{display:flex;align-items:center;gap:4px}
+.sh-turn{font-size:22pt;line-height:1}
+td.sh-hop{background:#FFE3CC}
+.sh-wrap table.sh-board{width:165mm}
+td.sh-hop{-webkit-print-color-adjust:exact;print-color-adjust:exact}

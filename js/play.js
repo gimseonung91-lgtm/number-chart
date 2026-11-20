@@ -268,6 +268,8 @@ function saveRecord(stopped) {
     hinted: G.hinted, prompted: G.prompted, askHelp: G.askHelp, askRest: G.askRest, offers: G.offers, demos: G.demos, moodStart: G.moodStart,
     restWaited: G.restWaited
   };
+  /* 학습 단계 경로를 쓰는 중이고 그 단계의 놀이면 단계 번호를 남긴다 (단계 올리기·내리기 제안의 근거) */
+  if (SC.PATH[cfg.step] && SC.PATH[cfg.step].mode === G.mode) r.step = cfg.step;
   if (stopped) r.stopped = true;
   recs.unshift(r);
   SC.store.set('rec', recs.slice(0, 300));

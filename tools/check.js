@@ -29,6 +29,21 @@ function checkAnswer(m, G, p, where) {
     p.seq.forEach((x, i) => { if (x < 1 || x > R || (i && x - p.seq[i - 1] !== p.s)) fail(where, `수열 ${p.seq}`); });
     if (p.ans !== p.seq[p.miss]) fail(where, '빈칸 정답');
   }
+  /* 12회차 놀이: 정답이 늘 범위 안, 낱말·간격이 설정과 맞는지, 줄 끝 문제가 실제로 나오는지 */
+  const RR = Math.max(R, 20);
+  if (m === 'order') {
+    if (p.ans !== p.c + (p.ask === 'next' ? 1 : -1) || p.ans < 1 || p.ans > RR) fail(where, `c=${p.c} ask=${p.ask} ans=${p.ans}`);
+    if (cfg.orderAsk !== 'both' && p.ask !== cfg.orderAsk) fail(where, '설정과 다른 낱말');
+  }
+  if (m === 'wrap') {
+    if (p.ans !== p.c + 1 || p.end !== (p.c % 10 === 0)) fail(where, `c=${p.c}`);
+    if (Math.floor((p.c - 1) / 10) * 10 + 20 > RR) fail(where, `두 줄이 범위를 넘음 c=${p.c}`);
+  }
+  if (m === 'skip') {
+    if (p.s !== cfg.skipBy || p.ans - p.cur !== p.s || p.cur < 1 || p.ans > RR || (p.cur - p.b) % p.s) fail(where, `b=${p.b} cur=${p.cur} ans=${p.ans}`);
+    if (p.s === 2 && p.b !== (cfg.skipOdd ? 1 : 2)) fail(where, '2씩 시작 수');
+    if (p.s === 5 && p.ans % 5) fail(where, '5씩이 5의 배수가 아님');
+  }
 }
 function checkOpts(p, G, where) {
   const opts = SC.makeOpts(p, G.R), top = Math.max(G.R, 10, cfg.small);
@@ -58,6 +73,31 @@ for (const small of [5, 10]) for (const range of [20, 30, 50, 100]) for (const l
     }
   }
 }
+/* 12회차 놀이의 설정 변형 (낱말, 띠 보기, 뛰어 세기 간격) */
+const NEW = { order: ['orderAsk', ['both', 'next', 'prev']], wrap: ['wrapView', ['fold', 'line', 'grid']], skip: ['skipBy', [2, 5, 10]] };
+const edges = { order: 0, wrap: 0 };
+for (const [m, [key, vals]] of Object.entries(NEW)) for (const v of vals) for (const odd of [false, true]) for (const range of [20, 30, 50, 100]) for (const choiceN of [2, 3]) for (const help of ['lots', 'none']) {
+  Object.assign(cfg, { range, choiceN, help, answer: 'choice', skipOdd: odd, [key]: v });
+  const G = { mode: m, R: range, prev: null, done: 0, tries: 0, input: '', answered: false, wrong: new Set() };
+  for (let i = 0; i < 200; i++) {
+    const where = `${m} ${key}=${v} odd=${odd} range=${range}`;
+    const p = G.p = M[m].gen(G); problems++;
+    checkAnswer(m, G, p, where); checkOpts(p, G, where);
+    if (m === 'wrap' && p.end) edges.wrap++;
+    if (m === 'order' && (p.ask === 'next' ? p.c % 10 === 0 : p.c % 10 === 1)) edges.order++;
+    [M[m].speak(G), M[m].hintSay(G), M[m].goodSay(G)].forEach(speak);
+    M[m].look(G).forEach(s => speak(s.say));
+  }
+}
+for (const [m, n] of Object.entries(edges)) if (n < 500) fail(m, `줄이 바뀌는 문제가 너무 적음 (${n}개)`);
+/* 학습 단계 경로: 놀이가 있고, 설정값이 허용 목록을 통과하는지 */
+SC.PATH.forEach((st, i) => {
+  if (!M[st.mode]) fail('단계 ' + (i + 1), `없는 놀이 ${st.mode}`);
+  const n = SC.normalizeCfg({ ...cfg, ...st.set, v: cfg.v });
+  for (const [k, v] of Object.entries(st.set)) if (n[k] !== v) fail('단계 ' + (i + 1), `허용되지 않는 설정 ${k}=${v}`);
+  speak([M[st.mode] ? M[st.mode].label + '.' : '']);
+});
+if (SC.normalizeCfg({ step: SC.PATH.length, v: 3 }).step !== -1) fail('설정', '범위 밖 단계 번호를 받아들임');
 for (const k of Object.keys(SC.REWARDS)) speak([`이제 ${SC.REWARDS[k].label} 시간이에요.`]);
 for (let k = 1; k <= 10; k++) speak([SC.NATIVE[k]]);
 /* 놀이 엔진·SCERTS 화면이 say·openBreak·openRest·runDemo로 직접 말하는 고정 문장도 녹음 목록에 있는지 */

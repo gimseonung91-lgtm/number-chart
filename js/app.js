@@ -2,8 +2,8 @@
 (function (SC) {
 'use strict';
 const { $, $$, cfg, saveCfg, say, esc, ICON, REWARDS, MODES } = SC;
-const VIEWS = ['home', 'play', 'done', 'teacher', 'print', 'records', 'settings'];
-const TEACHER_VIEWS = ['teacher', 'print', 'records', 'settings'];
+const VIEWS = ['home', 'play', 'done', 'teacher', 'path', 'print', 'records', 'settings'];
+const TEACHER_VIEWS = ['teacher', 'path', 'print', 'records', 'settings'];
 const isTeacher = () => document.body.classList.contains('teacher');
 
 function show(v, opt) {
@@ -15,6 +15,8 @@ function show(v, opt) {
   if (v === 'print') SC.openPrint(opt);
   if (v === 'records') renderRecords();
   if (v === 'settings') fillSettings();
+  if (v === 'path') renderPath();
+  if (v === 'teacher') renderTeacherHome();
   window.scrollTo(0, 0);
 }
 SC.show = show;
@@ -88,9 +90,9 @@ function renderHome() {
 function fillSettings() {
   $('#s-homeMode').innerHTML = Object.entries(MODES).map(([k, m]) => `<option value="${k}">${m.label}</option>`).join('');
   $('#s-homeMode').value = cfg.homeMode;
-  const ids = ['range', 'blanks', 'count', 'level', 'help', 'answer', 'small', 'choiceN', 'demo', 'reward', 'mood', 'breakSec', 'share', 'restCards', 'restWait'];
+  const ids = ['range', 'blanks', 'count', 'level', 'help', 'answer', 'small', 'choiceN', 'demo', 'reward', 'mood', 'breakSec', 'share', 'restCards', 'restWait', 'orderAsk', 'wrapView', 'skipBy'];
   ids.forEach(k => { $('#s-' + k).value = cfg[k]; });
-  ['order', 'sound', 'voice', 'calm', 'flash', 'askBtns', 'offerBreak'].forEach(k => { $('#s-' + k).checked = !!cfg[k]; });
+  ['order', 'sound', 'voice', 'calm', 'flash', 'askBtns', 'offerBreak', 'skipOdd'].forEach(k => { $('#s-' + k).checked = !!cfg[k]; });
   $('#rwPick').innerHTML = Object.entries(REWARDS).map(([k, r]) => `<button type="button" data-rw="${k}" aria-pressed="${cfg.rewardIcon === k}" aria-label="${r.label}" title="${r.label}">${r.svg}</button>`).join('');
   $('#s-reward').placeholder = (REWARDS[cfg.rewardIcon] || REWARDS.block).label;
 }
@@ -102,7 +104,7 @@ $('#v-settings').addEventListener('input', e => {
   const el = e.target; if (!el.id || !el.id.startsWith('s-')) return;
   const k = el.id.slice(2);
   if (el.type === 'checkbox') cfg[k] = el.checked;
-  else if (['range', 'count', 'level', 'small', 'choiceN', 'breakSec', 'restCards', 'restWait'].includes(k)) cfg[k] = +el.value;
+  else if (['range', 'count', 'level', 'small', 'choiceN', 'breakSec', 'restCards', 'restWait', 'skipBy'].includes(k)) cfg[k] = +el.value;
   else if (k === 'blanks') { const v = parseInt(el.value, 10); if (!isNaN(v)) cfg.blanks = SC.clamp(v, 1, 99); }
   else cfg[k] = el.value;
   saveCfg();
@@ -119,7 +121,7 @@ function renderRecords() {
   const doneOf = r => r.done != null ? r.done : r.total;
   const pctOf = r => doneOf(r) ? Math.round(r.first / doneOf(r) * 100) : 0;
   const rangeOf = r => SC.BASICS.includes(r.mode) ? (r.small ? r.small + '까지' : '-') : r.mode === 'ten' ? `10~${Math.max(r.range, 20)}` : '1~' + r.range;
-  $('#recBody').innerHTML = recs.length ? recs.slice(0, 60).map((r, i) => `<tr><td>${fmt(r.t)}</td><td>${MODES[r.mode] ? MODES[r.mode].label : r.mode}</td><td>${rangeOf(r)}</td><td>${r.mode === 'near' || r.mode === 'seq' ? r.level + '단계' : '-'}</td><td>${HELP_LABEL[r.help] || ''}</td><td>${r.first} / ${doneOf(r)} (${pctOf(r)}%)${r.stopped ? ` <span class="small-note">· ${r.total}개 중 멈춤</span>` : ''}</td><td>${r.hinted != null ? `${r.hinted} · ${r.prompted}` : '-'}</td><td${r.askRest >= 3 ? ' class="warn" title="쉬기 요청이 잦아요"' : ''}>${r.askHelp != null ? `${r.askHelp} · ${r.askRest}${r.restWaited ? ` <span class="small-note">(기다림 ${r.restWaited})</span>` : ''}` : '-'}</td><td>${r.moodStart || r.moodEnd ? `${face(r.moodStart)} → ${face(r.moodEnd)}` : '-'}</td><td><button class="btn ghosty sm" data-rec="${i}">학습지</button></td></tr>`).join('')
+  $('#recBody').innerHTML = recs.length ? recs.slice(0, 60).map((r, i) => `<tr><td>${fmt(r.t)}</td><td>${MODES[r.mode] ? MODES[r.mode].label : r.mode}${r.step != null && SC.PATH[r.step] ? ` <span class="small-note">· ${r.step + 1}번 단계</span>` : ''}</td><td>${rangeOf(r)}</td><td>${r.mode === 'near' || r.mode === 'seq' ? r.level + '단계' : '-'}</td><td>${HELP_LABEL[r.help] || ''}</td><td>${r.first} / ${doneOf(r)} (${pctOf(r)}%)${r.stopped ? ` <span class="small-note">· ${r.total}개 중 멈춤</span>` : ''}</td><td>${r.hinted != null ? `${r.hinted} · ${r.prompted}` : '-'}</td><td${r.askRest >= 3 ? ' class="warn" title="쉬기 요청이 잦아요"' : ''}>${r.askHelp != null ? `${r.askHelp} · ${r.askRest}${r.restWaited ? ` <span class="small-note">(기다림 ${r.restWaited})</span>` : ''}` : '-'}</td><td>${r.moodStart || r.moodEnd ? `${face(r.moodStart)} → ${face(r.moodEnd)}` : '-'}</td><td><button class="btn ghosty sm" data-rec="${i}">학습지</button></td></tr>`).join('')
     : '<tr><td colspan="10" class="small-note">아직 기록이 없어요. 놀이를 한 번 끝까지 하면 여기에 쌓여요.</td></tr>';
   $('#recSum').innerHTML = Object.keys(MODES).map(m => {
     const rs = recs.filter(r => r.mode === m && doneOf(r) > 0).slice(0, 5);
@@ -157,6 +159,44 @@ $('#clearRec').addEventListener('click', e => {
   }
   clearArmed = false; SC.store.set('rec', []); b.textContent = '기록 모두 지우기'; $('#clearNote').textContent = '기록을 지웠어요.'; renderRecords();
 });
+
+/* ---------- 학습 단계 (12회차) ----------
+   단계를 고르면 그 단계의 놀이·설정이 바로 적용된다. '앱이 제안하기'여도 바꾸는 것은 늘 선생님이 누른다. */
+function stepStats(i, recs) {
+  const rs = recs.filter(r => r.step === i && r.mode === SC.PATH[i].mode).slice(0, 3);
+  if (!rs.length) return '<span class="small-note">기록 없음</span>';
+  return rs.map(r => { const d = r.done != null ? r.done : r.total; return `<span class="pst${r.stopped ? ' stop' : ''}" title="${r.stopped ? '중간에 멈춤' : ''}">${d ? Math.round(r.first / d * 100) : 0}%</span>`; }).join('') + '<span class="small-note">최근 스스로 맞힘</span>';
+}
+function renderPath() {
+  const recs = SC.readRecords(), cur = cfg.step, sug = SC.stepSuggestion(recs);
+  $('#s-advance').value = cfg.advance;
+  const { UP, DOWN } = SC.PATH_RULE;
+  $('#pathRule').innerHTML = cfg.advance === 'suggest'
+    ? `제안 기준 · 올리기: 5문제 이상 끝까지 한 최근 ${UP.runs}번이 모두 스스로 맞힘 ${UP.pct * 100}% 이상이고 정답 따라 누름 0번. 내리기: 최근 ${DOWN.runs}번 모두 ${DOWN.pct * 100}% 미만이거나 모두 중간에 멈춤. <b>제안은 이 화면과 선생님 홈에만 보이고, 학생 화면은 선생님이 바꿀 때만 바뀌어요.</b>`
+    : '앱은 기록만 쌓아요. 아래 표의 최근 결과와 블록 활동 모습을 함께 보고 단계를 골라 주세요.';
+  $('#pathSuggest').innerHTML = sug ? `<div class="psug ${sug.kind}"><b>${sug.kind === 'up' ? '다음 단계로 올려도 좋아요' : '한 단계 쉬운 것을 해 보면 어떨까요'}</b>
+    <span>${sug.from + 1}. ${esc(SC.PATH[sug.from].name)} → ${sug.to + 1}. ${esc(SC.PATH[sug.to].name)}</span><span class="small-note">근거: ${sug.why}</span>
+    <button class="btn" data-step="${sug.to}">${sug.kind === 'up' ? '올리기' : '내리기'}</button></div>` : '';
+  let area = '', h = '';
+  SC.PATH.forEach((st, i) => {
+    if (st.area !== area) { if (area) h += '</ol>'; area = st.area; h += `<h3 class="set-h">${esc(area)}</h3><ol class="plist">`; }
+    h += `<li class="${i === cur ? 'now' : ''}"><span class="pno">${i + 1}</span><span class="pnm">${esc(st.name)}<span class="small-note">${MODES[st.mode].label}</span></span><span class="pstats">${stepStats(i, recs)}</span>`
+      + (i === cur ? '<span class="pnow">지금 단계</span>' : `<button class="btn ghosty sm" data-step="${i}">이 단계로</button>`) + '</li>';
+  });
+  $('#pathList').innerHTML = h + '</ol>';
+  $('#pathNote').textContent = cur < 0 ? '지금은 단계 경로를 쓰지 않아요. 단계를 고르면 시작돼요.' : '';
+}
+$('#v-path').addEventListener('click', e => {
+  const b = e.target.closest('[data-step]'); if (!b) return;
+  SC.applyStep(+b.dataset.step); renderPath();
+  $('#pathNote').textContent = `${+b.dataset.step + 1}. ${SC.PATH[+b.dataset.step].name} — 학생 시작 화면에 이 놀이가 나와요.`;
+});
+$('#s-advance').addEventListener('change', e => { cfg.advance = e.target.value; saveCfg(); renderPath(); });
+$('#pathOff').addEventListener('click', () => { cfg.step = -1; saveCfg(); renderPath(); });
+function renderTeacherHome() {
+  const st = SC.PATH[cfg.step], sug = SC.stepSuggestion();
+  $('#pathCardNote').innerHTML = st ? `지금: ${cfg.step + 1}. ${esc(st.name)}${sug ? ` <b class="pbadge">${sug.kind === 'up' ? '올리기 제안' : '내리기 제안'}</b>` : ''}` : '지도 순서에 따른 20단계와 다음 단계 제안';
+}
 
 /* 버튼 속 그림 채우기 (HTML에는 자리만 둔다) */
 $$('[data-icon]').forEach(el => { el.insertAdjacentHTML('afterbegin', ICON[el.dataset.icon] || ''); });
